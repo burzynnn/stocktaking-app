@@ -40,7 +40,6 @@
     "babel-eslint": "^10.1.0",
     "eslint": "7.2.0",
     "eslint-config-airbnb-base": "14.2.0",
-    "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
     "husky": "^4.2.5",
     "jest": "^26.4.0",
@@ -48,5 +47,18 @@
     "nodemon": "^2.0.4",
     "nodemon-webpack-plugin": "^4.3.2",
     "supertest": "^4.0.2"
+  },
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint .",
+    "lint:no-warnings": "./node_modules/.bin/eslint . --max-warnings 0",
+    "lint:fix": "./node_modules/.bin/eslint . --fix"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "./node_modules/.bin/eslint . --cache --fix"
   }
 }
