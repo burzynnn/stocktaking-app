@@ -51,7 +51,12 @@
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "lint:no-warnings": "./node_modules/.bin/eslint . --max-warnings 0",
-    "lint:fix": "./node_modules/.bin/eslint . --fix"
+    "lint:fix": "./node_modules/.bin/eslint . --fix",
+    "build:prod": "./node_modules/.bin/webpack --config webpack.prod.js",
+    "build:test": "./node_modules/.bin/webpack --config webpack.test.js",
+    "prod": "node dist/main.bundle.js",
+    "test": "./node_modules/.bin/jest",
+    "dev": "webpack -w --config webpack.dev.js"
   },
   "husky": {
     "hooks": {
