@@ -1,8 +1,24 @@
 {
   "name": "stocktaking-app-server",
   "version": "0.0.1",
+  "keywords": [
+    "stocktaking",
+    "nodejs",
+    "express",
+    "webpack",
+    "docker",
+    "postgresql",
+    "redis"
+  ],
+  "homepage": "https://github.com/burzynnn/stocktaking-app/blob/master/README.md",
   "repository": "https://github.com/burzynnn/stocktaking-app",
+  "bugs": {
+    "url": "https://github.com/burzynnn/stocktaking-app/issues"
+  },
   "author": "burzynnn (https://github.com/burzynnn)",
+  "contributors": [
+    "Julo-coder <julokozlowskipriv@gmail.com> (https://github.com/Julo-coder)"
+  ],
   "license": "MIT",
   "private": false,
   "dependencies": {
