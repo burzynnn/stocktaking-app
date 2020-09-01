@@ -1,0 +1,16 @@
+FROM node:12.16.2-slim
+
+RUN yarn global add nodemon
+
+RUN mkdir /usr/src/app
+WORKDIR /usr/src/app
+
+COPY package.json ./
+COPY yarn.lock ./
+RUN yarn install
+
+COPY . .
+
+USER node
+
+CMD ["yarn", "dev"]
