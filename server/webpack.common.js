@@ -1,6 +1,7 @@
 const path = require("path");
 const nodeExternals = require("webpack-node-externals");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     entry: ["./src/index.js"],
@@ -22,5 +23,12 @@ module.exports = {
             },
         ],
     },
-    plugins: [new CleanWebpackPlugin()],
+    plugins: [
+        new CleanWebpackPlugin(),
+        new CopyWebpackPlugin({
+            patterns: [
+                { from: path.join(__dirname, "src", "public"), to: path.join(__dirname, "dist", "public") },
+            ],
+        }),
+    ],
 };
