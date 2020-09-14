@@ -5,7 +5,7 @@ import logger from "../utils/logger.util";
 
 // TODO: create connect/reconnect strategy
 const redisClient = new Redis({
-    host: "redis", port: 6379, username: "stocktaking", password: envConfig.redis.password,
+    host: "redis", port: 6379, username: "stocktaking", password: envConfig.redis.password, enableOfflineQueue: false,
 });
 
 redisClient.on("ready", () => logger.info("Connected to Redis.", { label: "redis" }));
