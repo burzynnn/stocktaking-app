@@ -6,6 +6,7 @@ import { join } from "path";
 
 import logger from "../utils/logger.util";
 import envConfig from "../config/env.config";
+import rateLimiterMiddleware from "../middlewares/rateLimiter.middleware";
 
 const app = express();
 
@@ -16,9 +17,15 @@ if (envConfig.server.environment === "production") {
 app.use(bodyParser.json());
 app.use(helmet());
 
+app.use(rateLimiterMiddleware);
+
 app.use(express.static(join(__dirname, "public")));
 app.set("views", join(__dirname, "public", "views"));
 app.set("view engine", "pug");
+
+app.get("/", (req, res) => {
+    res.send("Hi!");
+});
 
 const server = createServer(app).listen(envConfig.server.port, () => {
     logger.info(`HTTP server started on port ${envConfig.server.port}.`, { label: "express" });
