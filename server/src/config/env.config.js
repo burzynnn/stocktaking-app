@@ -9,6 +9,9 @@ const envConfig = {
     redis: {
         password: process.env.REDIS_PASSWORD,
     },
+    sendgrid: {
+        api_key: process.env.SENDGRID_API_KEY,
+    },
 };
 
 Object.keys(envConfig).forEach((category) => {
