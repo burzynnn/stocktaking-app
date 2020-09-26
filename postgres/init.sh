@@ -7,5 +7,9 @@ psql -v ON_ERROR_STOP=1 --username postgres --dbname postgres <<-EOSQL
     ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';
     CREATE DATABASE stocktaking;
     GRANT ALL PRIVILEGES ON DATABASE stocktaking TO stocktaking;
-    CREATE EXTENSION pg_stat_statements;
+EOSQL
+
+psql -v ON_ERROR_STOP=1 --username postgres --dbname stocktaking <<-EOSQL
+    CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 EOSQL
