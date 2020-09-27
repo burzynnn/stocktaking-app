@@ -37,10 +37,6 @@ User.init({
     password_reset_date: {
         type: DataTypes.DATE,
     },
-    company_uuid: {
-        type: DataTypes.UUID,
-        allowNull: false,
-    },
     user_type_uuid: {
         type: DataTypes.UUID,
         allowNull: false,
