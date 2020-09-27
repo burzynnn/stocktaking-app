@@ -5,6 +5,8 @@ import dbConnection from "../../loaders/postgres.loader";
 
 import User from "../user/user.model";
 
+import generateForeignKeyOptions from "../../utils/generateForeignKeyOptions";
+
 class Company extends Model {}
 
 Company.init({
@@ -30,7 +32,7 @@ Company.init({
     timestamps: true,
 });
 
-const fKOptions = { name: "company_uuid", type: DataTypes.UUID, allowNull: false };
+const fKOptions = generateForeignKeyOptions("company_uuid");
 
 Company.hasMany(User, { foreignKey: fKOptions, sourceKey: "uuid" });
 User.belongsTo(Company, { foreignKey: fKOptions, targetKey: "uuid" });
