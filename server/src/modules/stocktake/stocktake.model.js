@@ -17,10 +17,6 @@ Stocktake.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    created_by: {
-        type: DataTypes.UUID,
-        allowNull: false,
-    },
 }, {
     sequelize: dbConnection,
     modelName: "stocktake",
