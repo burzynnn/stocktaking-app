@@ -43,14 +43,6 @@ Item.init({
     image_file: {
         type: DataTypes.CHAR(128),
     },
-    created_by: {
-        type: DataTypes.UUID,
-        allowNull: false,
-    },
-    category_uuid: {
-        type: DataTypes.UUID,
-        allowNull: false,
-    },
 }, {
     sequelize: dbConnection,
     modelName: "item",
