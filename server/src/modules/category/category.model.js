@@ -17,10 +17,6 @@ Category.init({
         type: DataTypes.STRING(35),
         allowNull: false,
     },
-    created_by: {
-        type: DataTypes.UUID,
-        allowNull: false,
-    },
 }, {
     sequelize: dbConnection,
     modelName: "category",
