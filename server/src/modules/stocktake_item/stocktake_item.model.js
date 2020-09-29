@@ -14,7 +14,7 @@ StocktakeItem.init({
         unique: true,
     },
     quantity: {
-        type: DataTypes.NUMERIC(131072, 2),
+        type: DataTypes.NUMERIC(1000, 2),
         allowNull: false,
     },
     item_uuid: {
