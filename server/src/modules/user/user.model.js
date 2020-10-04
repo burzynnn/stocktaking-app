@@ -37,10 +37,6 @@ User.init({
     password_reset_date: {
         type: DataTypes.DATE,
     },
-    user_type_uuid: {
-        type: DataTypes.UUID,
-        allowNull: false,
-    },
 }, {
     sequelize: dbConnection,
     modelName: "user",
