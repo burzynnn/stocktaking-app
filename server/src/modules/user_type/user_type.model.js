@@ -20,11 +20,27 @@ UserType.init({
     },
     created_by: {
         type: DataTypes.UUID,
+        allowNull: true,
     },
 }, {
     sequelize: dbConnection,
     modelName: "user_type",
     timestamps: true,
+});
+
+UserType.afterSync(async () => {
+    const types = [["owner", "b8c2301c-ac75-4aa5-86ba-0d70956a59ea"], ["user", "d82f1c04-36ce-40ba-b3eb-45cf2fc18617"]];
+    types.forEach(async (type) => {
+        try {
+            const [name, uuid] = type;
+            await UserType.findOrCreate({
+                where: { uuid },
+                defaults: { uuid, type: name },
+            });
+        } catch (err) {
+            throw new Error(`Error happened while inserting pre-defined user types. ${err}`);
+        }
+    });
 });
 
 export default UserType;
