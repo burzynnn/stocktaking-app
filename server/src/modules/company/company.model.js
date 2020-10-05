@@ -3,10 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import dbConnection from "../../loaders/postgres.loader";
 
-import User from "../user/user.model";
-
-import generateForeignKeyOptions from "../../utils/generateForeignKeyOptions";
-
 class Company extends Model {}
 
 Company.init({
@@ -31,10 +27,5 @@ Company.init({
     modelName: "company",
     timestamps: true,
 });
-
-const fKOptions = generateForeignKeyOptions("company_uuid");
-
-Company.hasMany(User, { foreignKey: fKOptions, sourceKey: "uuid" });
-User.belongsTo(Company, { foreignKey: fKOptions, targetKey: "uuid" });
 
 export default Company;
