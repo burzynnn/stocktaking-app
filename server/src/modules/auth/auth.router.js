@@ -3,10 +3,10 @@ import AuthController from "./auth.controller";
 
 const router = Router();
 
-router.get("/login", (req, res) => res.render("modules/auth/login", { title: "Log in!" }));
+router.get("/login", AuthController.getLogin);
 router.post("/login", AuthController.postLogin);
 
-router.get("/register", (req, res) => res.render("modules/auth/register", { title: "Register" }));
+router.get("/register", AuthController.getRegister);
 router.post("/register", AuthController.postRegister);
 
 export default router;
