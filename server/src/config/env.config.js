@@ -4,7 +4,7 @@ const envConfig = {
         environment: process.env.NODE_ENV,
     },
     postgres: {
-        password: process.env.PG_PASSWORD,
+        password: process.env.POSTGRES_CUSTOM_USER_PASSWORD,
     },
     redis: {
         password: process.env.REDIS_PASSWORD,
