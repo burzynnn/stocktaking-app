@@ -10,6 +10,10 @@ class AuthController {
         this.userService = new US(UM);
         this.mailService = MS;
     }
+
+    getLogin = (req, res) => res.render("modules/auth/login", { title: "Log in!" });
+
+    getRegister = (req, res) => res.render("modules/auth/register", { title: "Register" });
 }
 
 export default new AuthController(CompanyService, CompanyModel, UserService, UserModel, sgMail);
