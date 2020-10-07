@@ -9,6 +9,7 @@ import envConfig from "../config/env.config";
 import rateLimiterMiddleware from "../middlewares/rateLimiter.middleware";
 
 import indexRouter from "../modules/index/index.router";
+import authRouter from "../modules/auth/auth.router";
 
 const app = express();
 
@@ -16,7 +17,7 @@ if (envConfig.server.environment === "production") {
     app.set("trust proxy", 1);
 }
 
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 
 app.use(rateLimiterMiddleware);
@@ -26,6 +27,7 @@ app.set("views", join(__dirname, "public", "views"));
 app.set("view engine", "pug");
 
 app.use("/", indexRouter);
+app.use("/auth", authRouter);
 
 const server = createServer(app).listen(envConfig.server.port, () => {
     logger.info(`HTTP server started on port ${envConfig.server.port}.`, { label: "express" });
