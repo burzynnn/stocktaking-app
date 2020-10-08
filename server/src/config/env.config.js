@@ -11,6 +11,7 @@ const envConfig = {
     },
     sendgrid: {
         api_key: process.env.SENDGRID_API_KEY,
+        send_from: process.env.SENGRID_SEND_FROM,
     },
 };
 
