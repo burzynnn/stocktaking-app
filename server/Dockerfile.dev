@@ -1,4 +1,4 @@
-FROM node:12.16.2-slim
+FROM node:lts-slim
 
 RUN yarn global add nodemon
 
