@@ -42,12 +42,12 @@ class AuthController {
             const companyActivationHash = await generateHash(128);
             const companyActivationExpirationDate = generateExpirationDate(1);
 
-            const createdCompany = await this.companyService.create(
-                companyName,
-                companyEmail,
-                companyActivationHash,
-                companyActivationExpirationDate,
-            );
+            const createdCompany = await this.companyService.create({
+                name: companyName,
+                email: companyEmail,
+                hash: companyActivationHash,
+                timestamp: companyActivationExpirationDate,
+            });
 
             const companyMsg = {
                 to: createdCompany.official_email,
@@ -71,7 +71,15 @@ class AuthController {
             const userActivationExpirationDate = generateExpirationDate(1);
 
             const hashedPassword = await hash(userPassword);
-            const createdUser = await this.userService.create(userName, userEmail, hashedPassword, userActivationHash, userActivationExpirationDate, createdCompany.uuid, "b8c2301c-ac75-4aa5-86ba-0d70956a59ea");
+            const createdUser = await this.userService.create({
+                name: userName,
+                email: userEmail,
+                password: hashedPassword,
+                hash: userActivationHash,
+                timestamp: userActivationExpirationDate,
+                companyUUID: createdCompany.uuid,
+                userTypeUUID: "b8c2301c-ac75-4aa5-86ba-0d70956a59ea",
+            });
 
             const userMsg = {
                 to: createdUser.email,
