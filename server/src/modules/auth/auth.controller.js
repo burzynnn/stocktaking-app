@@ -51,11 +51,14 @@ class AuthController {
 
             const companyMsg = {
                 to: createdCompany.official_email,
-                subject: "Sending with Twilio SendGrid is Fun",
-                text: "and easy to do anywhere, even with Node.js",
-                html: "<strong>and easy to do anywhere, even with Node.js</strong>",
+                subject: "Confirm your company registration.",
+                text: `We are happy to see your company on stocktaking-app!
+                However, we have to be sure that your registration wasn't a mistake. Please go to the link you see below.
+                http://localhost:3000/auth/registration-verification?hash=${companyActivationHash}&type=company`,
+                html: `<h1>We are happy to see your company on stocktaking-app!</h1>
+                <p>However, we have to be sure that your registration wasn't a mistake. Please click link below.<p>
+                <a href='http://localhost:3000/auth/registration-verification?hash=${companyActivationHash}&type=company'>Confirm your registration!</a>`,
             };
-
             await this.mailer.sendMail(companyMsg);
 
             // user
@@ -72,11 +75,14 @@ class AuthController {
 
             const userMsg = {
                 to: createdUser.email,
-                subject: "Sending with Twilio SendGrid is Fun",
-                text: "and easy to do anywhere, even with Node.js",
-                html: "<strong>and easy to do anywhere, even with Node.js</strong>",
+                subject: "Confirm your registration.",
+                text: `We are happy to see you on stocktaking-app!
+                However, we have to be sure that your registration wasn't a mistake. Please go to the link you see below.
+                http://localhost:3000/auth/registration-verification?hash=${userActivationHash}&type=user`,
+                html: `<h1>We are happy to see you on stocktaking-app!</h1>
+                <p>However, we have to be sure that your registration wasn't a mistake. Please click link below.<p>
+                <a href='http://localhost:3000/auth/registration-verification?hash=${userActivationHash}&type=user'>Confirm your registration!</a>`,
             };
-
             await this.mailer.sendMail(userMsg);
 
             return res.send("<h1>Your company has been registered and user created.</h1>");
