@@ -1,4 +1,4 @@
-import { hash } from "argon2";
+import { hash as argonHash } from "argon2";
 
 import CompanyService from "../company/company.service";
 import CompanyModel from "../company/company.model";
@@ -70,7 +70,7 @@ class AuthController {
             const userActivationHash = await generateHash(128);
             const userActivationExpirationDate = generateExpirationDate(1);
 
-            const hashedPassword = await hash(userPassword);
+            const hashedPassword = await argonHash(userPassword);
             const createdUser = await this.userService.create({
                 name: userName,
                 email: userEmail,
@@ -94,6 +94,28 @@ class AuthController {
             await this.mailer.sendMail(userMsg);
 
             return res.send("<h1>Your company has been registered and user created.</h1>");
+        } catch (err) {
+            return next(err);
+        }
+    }
+
+    getRegistrationVerification = async (req, res, next) => {
+        const { hash, type } = req.query;
+        if (!hash || !type) {
+            return res.send("<h1>Query parametrs not specified.</h1>");
+        }
+
+        try {
+            const service = type === "company" ? this.companyService : this.userService;
+            const foundRow = await service.findOneByActivationHash(hash);
+            if (!foundRow) {
+                return res.send("<h1>Company not found.</h1>");
+            }
+            foundRow.active = true;
+            foundRow.activation_hash = null;
+            foundRow.activation_expiration_date = null;
+            await foundRow.save();
+            return res.send(`<h1>${type} has been activated.`);
         } catch (err) {
             return next(err);
         }
