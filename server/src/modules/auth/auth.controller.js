@@ -6,7 +6,8 @@ import UserService from "../user/user.service";
 import UserModel from "../user/user.model";
 import mailer from "../../loaders/sendgrid.loader";
 
-import generateRandomString from "../../utils/generateRandomString";
+import generateHash from "../../utils/generateHash";
+import generateExpirationDate from "../../utils/generateExpirationDate";
 
 class AuthController {
     constructor(CS, CM, US, UM, mailingUtil) {
@@ -32,16 +33,14 @@ class AuthController {
                 return res.send("<h1>Passwords are not the same.</h1>");
             }
 
+            // company
             const companyDuplicate = await this.companyService.findOneByEmail(companyEmail);
             if (companyDuplicate) {
                 return res.send("<h1>Company with this email has been already registered.");
             }
 
-            const companyActivationHash = generateRandomString();
-            const companyActivationExpirationDate = new Date();
-            companyActivationExpirationDate.setHours(
-                companyActivationExpirationDate.getHours() + 1,
-            );
+            const companyActivationHash = await generateHash(128);
+            const companyActivationExpirationDate = generateExpirationDate(1);
 
             const createdCompany = await this.companyService.create(
                 companyName,
@@ -59,17 +58,16 @@ class AuthController {
 
             await this.mailer.sendMail(companyMsg);
 
+            // user
             const userDuplicate = await this.userService.findOneByEmail(userEmail);
             if (userDuplicate) {
                 return res.send("<h1>User with this email has been already registered</h1>");
             }
 
-            const userActivationHash = generateRandomString();
-            const userActivationExpirationDate = new Date();
-            userActivationExpirationDate.setHours(userActivationExpirationDate.getHours() + 1);
+            const userActivationHash = await generateHash(128);
+            const userActivationExpirationDate = generateExpirationDate(1);
 
             const hashedPassword = await hash(userPassword);
-            console.log(hashedPassword);
             const createdUser = await this.userService.create(userName, userEmail, hashedPassword, userActivationHash, userActivationExpirationDate, createdCompany.uuid, "b8c2301c-ac75-4aa5-86ba-0d70956a59ea");
 
             const userMsg = {
