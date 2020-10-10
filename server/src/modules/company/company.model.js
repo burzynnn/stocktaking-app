@@ -22,6 +22,17 @@ Company.init({
         allowNull: false,
         unique: true,
     },
+    active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+    },
+    activation_hash: {
+        type: DataTypes.CHAR(128),
+    },
+    activation_expiration_date: {
+        type: DataTypes.DATE,
+    },
 }, {
     sequelize: dbConnection,
     modelName: "company",

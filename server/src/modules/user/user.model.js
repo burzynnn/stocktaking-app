@@ -31,6 +31,12 @@ User.init({
         allowNull: false,
         defaultValue: true,
     },
+    activation_hash: {
+        type: DataTypes.CHAR(128),
+    },
+    activation_expiration_date: {
+        type: DataTypes.DATE,
+    },
     password_reset_hash: {
         type: DataTypes.CHAR(128),
     },
