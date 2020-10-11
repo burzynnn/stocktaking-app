@@ -1,4 +1,5 @@
 import { hash as argonHash } from "argon2";
+import dayjs from "dayjs";
 
 import CompanyService from "../company/company.service";
 import CompanyModel from "../company/company.model";
@@ -109,7 +110,10 @@ class AuthController {
             const service = type === "company" ? this.companyService : this.userService;
             const foundRow = await service.findOneByActivationHash(hash);
             if (!foundRow) {
-                return res.send("<h1>Company not found.</h1>");
+                return res.send(`<h1>${type} not found.</h1>`);
+            }
+            if (dayjs().isAfter(dayjs(foundRow.activation_expiration_date))) {
+                return res.send("<h1>Activation expired.</h1>");
             }
             foundRow.active = true;
             foundRow.activation_hash = null;
