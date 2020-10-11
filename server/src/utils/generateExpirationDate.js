@@ -1,7 +1,5 @@
-const generateExpirationDate = (increase) => {
-    const now = new Date();
-    now.setHours(now.getHours() + increase);
-    return now;
-};
+import dayjs from "dayjs";
+
+const generateExpirationDate = (increase) => dayjs().add(increase, "hour");
 
 export default generateExpirationDate;

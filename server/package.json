@@ -38,6 +38,7 @@
     "cookie-parser": "^1.4.5",
     "copy-webpack-plugin": "^6.1.0",
     "csurf": "^1.11.0",
+    "dayjs": "^1.9.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "helmet": "^4.0.0",
