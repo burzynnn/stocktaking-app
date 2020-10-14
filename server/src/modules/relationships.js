@@ -37,8 +37,10 @@ export default () => {
     Company.hasMany(User, { foreignKey: options.company.user });
     User.belongsTo(Company, { foreignKey: options.company.user });
 
-    User.hasMany(UserType, { foreignKey: options.user.user_type });
-    UserType.hasMany(User, { foreignKey: options.user_type.user, constraints: false });
+    User.hasMany(UserType, { foreignKey: options.user.user_type, as: "user_creates_user_types" });
+    UserType.belongsTo(User, { foreignKey: options.user.user_type, as: "user_type_is_created_by_user" });
+    UserType.hasMany(User, { foreignKey: options.user_type.user, constraints: false, as: "user_type_is_used_by_users" });
+    User.belongsTo(UserType, { foreignKey: options.user_type.user, constraints: false, as: "user_has_user_type" });
 
     User.hasMany(Stocktake, { foreignKey: options.user.stocktake });
     Stocktake.belongsTo(User, { foreignKey: options.user.stocktake });
