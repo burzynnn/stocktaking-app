@@ -37,6 +37,7 @@
     "connect-redis": "^5.0.0",
     "cookie-parser": "^1.4.5",
     "copy-webpack-plugin": "^6.1.0",
+    "cron": "^1.8.2",
     "csurf": "^1.11.0",
     "dayjs": "^1.9.1",
     "express": "^4.17.1",
