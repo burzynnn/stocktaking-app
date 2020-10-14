@@ -1,14 +1,14 @@
 import { Router } from "express";
-import AuthController from "./auth.controller";
+import authController from "./auth.controller";
 
 const router = Router();
 
-router.get("/login", AuthController.getLogin);
-router.post("/login", AuthController.postLogin);
+router.get("/login", authController.getLogin);
+router.post("/login", authController.postLogin);
 
-router.get("/register", AuthController.getRegister);
-router.post("/register", AuthController.postRegister);
+router.get("/register", authController.getRegister);
+router.post("/register", authController.postRegister);
 
-router.get("/registration-verification", AuthController.getRegistrationVerification);
+router.get("/registration-verification", authController.getRegistrationVerification);
 
 export default router;

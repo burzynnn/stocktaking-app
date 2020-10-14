@@ -1,19 +1,17 @@
 import { hash as argonHash } from "argon2";
 import dayjs from "dayjs";
 
-import CompanyService from "../company/company.service";
-import CompanyModel from "../company/company.model";
-import UserService from "../user/user.service";
-import UserModel from "../user/user.model";
+import companyService from "../company/company.service";
+import userService from "../user/user.service";
 import mailer from "../../loaders/sendgrid.loader";
 
 import generateHash from "../../utils/generateHash";
 import generateExpirationDate from "../../utils/generateExpirationDate";
 
 class AuthController {
-    constructor(CS, CM, US, UM, mailingUtil) {
-        this.companyService = new CS(CM);
-        this.userService = new US(UM);
+    constructor(cS, uS, mailingUtil) {
+        this.companyService = cS;
+        this.userService = uS;
         this.mailer = mailingUtil;
     }
 
@@ -126,4 +124,4 @@ class AuthController {
     }
 }
 
-export default new AuthController(CompanyService, CompanyModel, UserService, UserModel, mailer);
+export default new AuthController(companyService, userService, mailer);
