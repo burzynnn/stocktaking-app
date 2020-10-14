@@ -4,7 +4,7 @@ import companyService from "../company/company.service";
 import userService from "../user/user.service";
 import logger from "../../utils/logger.util";
 
-const removeNotActivatedAccounts = new CronJob("0 3 * * * *", async () => {
+const removeNotActivatedAccounts = new CronJob("0 0 * * * *", async () => {
     logger.info("Clearing not activated accounts.", { label: "auth_cron" });
 
     // first find all expired companies and delete it and its owner
