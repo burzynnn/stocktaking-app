@@ -29,7 +29,12 @@ class UserService {
         user_type_uuid: userTypeUUID,
     });
 
-    findOneByEmail = (email) => this.userModel.findOne({ where: { email } });
+    findOneByEmail = (email) => this.userModel.findOne({
+        where: {
+            email,
+        },
+        attributes: ["uuid", "email", "password", "active"],
+    });
 
     findOneByActivationHash = (hash) => this.userModel.findOne({
         where: {
