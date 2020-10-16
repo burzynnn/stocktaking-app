@@ -1,4 +1,4 @@
-import { hash as argonHash } from "argon2";
+import { hash as argonHash, verify as argonVerify } from "argon2";
 import dayjs from "dayjs";
 
 import companyService from "../company/company.service";
@@ -19,12 +19,40 @@ class AuthController {
 
     getRegister = (req, res) => res.render("modules/auth/register", { title: "Register" });
 
-    postLogin = async (req, res) => res.send("<h1>nothin here</h1>");
+    postLogin = async (req, res, next) => {
+        const { email, password } = req.body;
+
+        if (req.session.loggedIn) {
+            return res.redirect("/");
+        }
+
+        try {
+            const foundUser = await this.userService.findOneByEmail(email);
+            if (!foundUser) {
+                return res.send("<h1>No user found with provided email.</h1>");
+            }
+            if (!foundUser.active) {
+                return res.send("<h1>You didn't activate your account.</h1>");
+            }
+            if (!await argonVerify(foundUser.password, password)) {
+                return res.send("<h1>Wrong password.</h1>");
+            }
+
+            req.session.loggedIn = true;
+            req.session.uuid = foundUser.uuid;
+            req.session.user_type_uuid = foundUser.user_has_user_type.uuid;
+
+            return res.redirect("/");
+        } catch (err) {
+            return next(err);
+        }
+    }
 
     postRegister = async (req, res, next) => {
         const {
             companyName, companyEmail, userName, userEmail, userPassword, userRepeatPassword,
         } = req.body;
+
         try {
             // TODO: one error should revert all inserts !!!
             // TODO: swap res.send with res.render
