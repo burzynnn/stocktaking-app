@@ -6,7 +6,9 @@ import { join } from "path";
 
 import logger from "../utils/logger.util";
 import envConfig from "../config/env.config";
+
 import rateLimiterMiddleware from "../middlewares/rateLimiter.middleware";
+import sessionMiddleware from "../middlewares/session.middleware";
 
 import indexRouter from "../modules/index/index.router";
 import authRouter from "../modules/auth/auth.router";
@@ -21,6 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 
 app.use(rateLimiterMiddleware);
+app.use(sessionMiddleware);
 
 app.use(express.static(join(__dirname, "public")));
 app.set("views", join(__dirname, "public", "views"));
