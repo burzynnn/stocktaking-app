@@ -48,7 +48,7 @@ class UserService {
             company_uuid: companyUUID,
         },
         include: {
-            association: "userTypeToUser",
+            association: "user_has_user_type",
             attributes: ["type"],
             where: {
                 type: "owner",
