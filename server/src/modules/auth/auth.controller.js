@@ -17,8 +17,6 @@ class AuthController {
 
     getLogin = (req, res) => res.render("modules/auth/login", { title: "Log in!" });
 
-    getRegister = (req, res) => res.render("modules/auth/register", { title: "Register" });
-
     postLogin = async (req, res, next) => {
         const { email, password } = req.body;
 
@@ -47,6 +45,8 @@ class AuthController {
             return next(err);
         }
     }
+
+    getRegister = (req, res) => res.render("modules/auth/register", { title: "Register" });
 
     postRegister = async (req, res, next) => {
         const {
