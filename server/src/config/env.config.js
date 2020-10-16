@@ -2,6 +2,7 @@ const envConfig = {
     server: {
         port: process.env.SRV_PORT,
         environment: process.env.NODE_ENV,
+        session_secret: process.env.SRV_SESSION_SECRET,
     },
     postgres: {
         password: process.env.POSTGRES_CUSTOM_USER_PASSWORD,
