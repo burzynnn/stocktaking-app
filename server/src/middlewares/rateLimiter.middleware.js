@@ -1,10 +1,10 @@
 import { RateLimiterRedis } from "rate-limiter-flexible";
 
-import redisClient from "../loaders/redis.loader";
+import redisClients from "../loaders/redis.loader";
 import logger from "../utils/logger.util";
 
 const rateLimiter = new RateLimiterRedis({
-    storeClient: redisClient,
+    storeClient: redisClients.rateLimiting,
     keyPrefix: "ratelimiter",
     points: 1000,
     duration: 3600,
