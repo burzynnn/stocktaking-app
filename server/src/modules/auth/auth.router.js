@@ -9,6 +9,8 @@ router.post("/login", authController.postLogin);
 router.get("/register", authController.getRegister);
 router.post("/register", authController.postRegister);
 
+router.get("/logout", authController.getLogout);
+
 router.get("/registration-verification", authController.getRegistrationVerification);
 
 export default router;

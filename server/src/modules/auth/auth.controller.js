@@ -126,6 +126,15 @@ class AuthController {
         }
     }
 
+    getLogout = (req, res, next) => {
+        req.session.destroy((err) => {
+            if (err) {
+                return next(err);
+            }
+            return res.clearCookie("stocktaking.sid").redirect("/");
+        });
+    }
+
     getRegistrationVerification = async (req, res, next) => {
         const { hash, type } = req.query;
         if (!hash || !type) {
