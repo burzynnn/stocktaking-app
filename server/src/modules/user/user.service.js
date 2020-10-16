@@ -33,6 +33,10 @@ class UserService {
         where: {
             email,
         },
+        include: {
+            association: "user_has_user_type",
+            attributes: ["uuid"],
+        },
         attributes: ["uuid", "email", "password", "active"],
     });
 
