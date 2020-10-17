@@ -3,6 +3,7 @@ import { createServer } from "http";
 import bodyParser from "body-parser";
 import helmet from "helmet";
 import { join } from "path";
+import csrf from "csurf";
 
 import logger from "../utils/logger.util";
 import envConfig from "../config/env.config";
@@ -24,6 +25,7 @@ app.use(helmet());
 
 app.use(rateLimiterMiddleware);
 app.use(sessionMiddleware);
+app.use(csrf());
 
 app.use(express.static(join(__dirname, "public")));
 app.set("views", join(__dirname, "public", "views"));
