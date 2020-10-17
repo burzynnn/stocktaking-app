@@ -15,7 +15,7 @@ class AuthController {
         this.mailer = mailingUtil;
     }
 
-    getLogin = (req, res) => res.render("modules/auth/login", { title: "Log in!" });
+    getLogin = (req, res) => res.render("modules/auth/login", { title: "Log in!", csrf: req.csrfToken() });
 
     postLogin = async (req, res, next) => {
         const { email, password } = req.body;
@@ -46,7 +46,7 @@ class AuthController {
         }
     }
 
-    getRegister = (req, res) => res.render("modules/auth/register", { title: "Register" });
+    getRegister = (req, res) => res.render("modules/auth/register", { title: "Register", csrf: req.csrfToken() });
 
     postRegister = async (req, res, next) => {
         const {
