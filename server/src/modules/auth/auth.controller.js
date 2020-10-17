@@ -38,7 +38,7 @@ class AuthController {
 
             req.session.loggedIn = true;
             req.session.uuid = foundUser.uuid;
-            req.session.user_type_uuid = foundUser.user_has_user_type.uuid;
+            req.session.user_type_uuid = foundUser.user_type_uuid;
 
             return res.redirect("/");
         } catch (err) {

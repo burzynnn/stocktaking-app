@@ -33,11 +33,7 @@ class UserService {
         where: {
             email,
         },
-        include: {
-            association: "user_has_user_type",
-            attributes: ["uuid"],
-        },
-        attributes: ["uuid", "email", "password", "active"],
+        attributes: ["uuid", "email", "password", "active", "user_type_uuid"],
     });
 
     findOneByActivationHash = (hash) => this.userModel.findOne({
