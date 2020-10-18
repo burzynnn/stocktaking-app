@@ -159,6 +159,76 @@ class AuthController {
             return next(err);
         }
     }
+
+    getForgotPassword = async (req, res) => res.render("modules/auth/forgot-password", { title: "Forgot password", csrf: req.csrfToken() });
+
+    /* eslint-disable consistent-return */
+    postForgotPassword = async (req, res, next) => {
+        const { email } = req.body;
+        if (!email) {
+            return res.send("<h1>No email specified.</h1>");
+        }
+
+        res.send("<h1>Head to your email account and check if message arrived.</h1>");
+
+        try {
+            const foundUser = await this.userService.findOneByEmail(email);
+            if (foundUser) {
+                const passwordResetHash = await generateHash(128);
+                const passwordResetExpirationDate = generateExpirationDate(1);
+
+                foundUser.password_reset_hash = passwordResetHash;
+                foundUser.password_reset_expiration_date = passwordResetExpirationDate;
+                const savedUser = await foundUser.save();
+
+                const userMsg = {
+                    to: savedUser.email,
+                    subject: "Reset password.",
+                    text: `You have received this email because of your password reset request.
+                    If this was not done by you you can ignore this message.
+                    Otherwise click link below.
+                    http://localhost:3000/auth/reset-password?hash=${savedUser.password_reset_hash}`,
+                    html: `<h1>You have received this email because of your password reset request.</h1>
+                    <p>If this was not done by you you can ignore this message.
+                    Otherwise click link below.<p>
+                    <a href='http://localhost:3000/auth/reset-password?hash=${savedUser.password_reset_hash}'>Reset my password!</a>`,
+                };
+                return await this.mailer.sendMail(userMsg);
+            }
+        } catch (err) {
+            return next(err);
+        }
+    }
+
+    getResetPassword = (req, res) => res.render("modules/auth/reset-password", { title: "Reset password", csrf: req.csrfToken() });
+
+    postResetPassword = async (req, res, next) => {
+        const { hash } = req.query;
+        const { newPassword, repeatNewPassword } = req.body;
+        if (newPassword !== repeatNewPassword) {
+            return res.send("<h1>Passwords are not the same.</h1>");
+        }
+
+        try {
+            const foundUser = await this.userService.findOneByPasswordResetHash(hash);
+            if (!foundUser) {
+                return res.send("<h1>No user found by provided hash.</h1>");
+            }
+            if (dayjs().isAfter(dayjs(foundUser.password_reset_expiration_date))) {
+                return res.send("<h1>Activation expired.</h1>");
+            }
+
+            const hashedPassword = await argonHash(newPassword);
+            foundUser.password = hashedPassword;
+            foundUser.password_reset_hash = null;
+            foundUser.password_reset_date = null;
+            await foundUser.save();
+
+            return res.send("<h1>Password changed successfully.</h1>");
+        } catch (err) {
+            return next(err);
+        }
+    }
 }
 
 export default new AuthController(companyService, userService, mailer);
