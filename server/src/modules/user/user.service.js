@@ -24,7 +24,7 @@ class UserService {
         activation_hash: hash,
         activation_expiration_date: timestamp,
         password_reset_hash: null,
-        password_reset_date: null,
+        password_reset_expiration_date: null,
         company_uuid: companyUUID,
         user_type_uuid: userTypeUUID,
     });
@@ -34,6 +34,13 @@ class UserService {
             email,
         },
         attributes: ["uuid", "email", "password", "active", "user_type_uuid"],
+    });
+
+    findOneByPasswordResetHash = (hash) => this.userModel.findOne({
+        where: {
+            password_reset_hash: hash,
+        },
+        attributes: ["uuid", "password", "password_reset_hash", "password_reset_expiration_date"],
     });
 
     findOneByActivationHash = (hash) => this.userModel.findOne({
