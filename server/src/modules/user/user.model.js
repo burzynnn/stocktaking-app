@@ -40,7 +40,7 @@ User.init({
     password_reset_hash: {
         type: DataTypes.CHAR(128),
     },
-    password_reset_date: {
+    password_reset_expiration_date: {
         type: DataTypes.DATE,
     },
 }, {
