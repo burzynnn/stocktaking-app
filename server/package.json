@@ -42,6 +42,7 @@
     "dayjs": "^1.9.1",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "faker": "^5.1.0",
     "helmet": "^4.0.0",
     "ioredis": "^4.17.3",
     "multer": "^1.4.2",
@@ -79,7 +80,7 @@
     "build:prod": "./node_modules/.bin/webpack --config webpack.prod.js",
     "build:test": "./node_modules/.bin/webpack --config webpack.test.js",
     "prod": "node dist/main.bundle.js",
-    "test": "./node_modules/.bin/jest",
+    "test": "./node_modules/.bin/jest --testPathIgnorePatterns webpack.test.js",
     "dev": "webpack -w --config webpack.dev.js"
   },
   "husky": {
