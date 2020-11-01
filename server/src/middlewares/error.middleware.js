@@ -8,11 +8,17 @@ export default class ErrorMiddleware {
     /* eslint-disable no-unused-vars */
     static exceptionHandler = (err, req, res, next) => {
         if (isCelebrateError(err)) {
-            const validationErrors = err.details.get("body").details;
+            const validationErrors = err.details;
+
+            if (validationErrors.has("query")) {
+                let message = "";
+                validationErrors.get("query").details.forEach((e) => { message += `Query parameter ${e.message}. `; });
+                return res.status(400).send(message);
+            }
 
             req.flash("errors", validationErrors);
 
-            return res.redirect("back");
+            return res.status(422).redirect("back");
         }
 
         logger.error(err, { label: "error" });
