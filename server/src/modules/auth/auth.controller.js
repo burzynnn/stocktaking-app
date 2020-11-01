@@ -50,15 +50,12 @@ class AuthController {
 
     postRegister = async (req, res, next) => {
         const {
-            companyName, companyEmail, userName, userEmail, userPassword, userRepeatPassword,
+            companyName, companyEmail, userName, userEmail, userPassword,
         } = req.body;
 
         try {
             // TODO: one error should revert all inserts !!!
             // TODO: swap res.send with res.render
-            if (userPassword !== userRepeatPassword) {
-                return res.send("<h1>Passwords are not the same.</h1>");
-            }
 
             // company
             const companyDuplicate = await this.companyService.findOneByEmail(companyEmail);
@@ -137,9 +134,6 @@ class AuthController {
 
     getRegistrationVerification = async (req, res, next) => {
         const { hash, type } = req.query;
-        if (!hash || !type) {
-            return res.send("<h1>Query parametrs not specified.</h1>");
-        }
 
         try {
             const service = type === "company" ? this.companyService : this.userService;
@@ -165,9 +159,6 @@ class AuthController {
     /* eslint-disable consistent-return */
     postForgotPassword = async (req, res, next) => {
         const { email } = req.body;
-        if (!email) {
-            return res.send("<h1>No email specified.</h1>");
-        }
 
         res.send("<h1>Head to your email account and check if message arrived.</h1>");
 
@@ -204,10 +195,7 @@ class AuthController {
 
     postResetPassword = async (req, res, next) => {
         const { hash } = req.query;
-        const { newPassword, repeatNewPassword } = req.body;
-        if (newPassword !== repeatNewPassword) {
-            return res.send("<h1>Passwords are not the same.</h1>");
-        }
+        const { newPassword } = req.body;
 
         try {
             const foundUser = await this.userService.findOneByPasswordResetHash(hash);
