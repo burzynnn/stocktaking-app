@@ -5,6 +5,7 @@ export default class AuthValidator {
         body: Joi.object().options({ abortEarly: false }).keys({
             email: Joi.string().email().trim().required(),
             password: Joi.string().trim().required(),
+            _csrf: Joi.string().trim().length(36).required(),
         }),
     }
 
@@ -16,6 +17,7 @@ export default class AuthValidator {
             userEmail: Joi.string().email().trim().required(),
             userPassword: Joi.string().min(8).trim().required(),
             userRepeatPassword: Joi.any().valid(Joi.ref("userPassword")).required(),
+            _csrf: Joi.string().trim().length(36).required(),
         }),
     }
 
@@ -29,6 +31,7 @@ export default class AuthValidator {
     static postForgotPassword = {
         body: Joi.object().options({ abortEarly: false }).keys({
             email: Joi.string().email().trim().required(),
+            _csrf: Joi.string().trim().length(36).required(),
         }),
     }
 
@@ -39,6 +42,7 @@ export default class AuthValidator {
         body: Joi.object().options({ abortEarly: false }).keys({
             newPassword: Joi.string().min(8).trim().required(),
             repeatNewPassword: Joi.any().valid(Joi.ref("newPassword")).required(),
+            _csrf: Joi.string().trim().length(36).required(),
         }),
     }
 }
