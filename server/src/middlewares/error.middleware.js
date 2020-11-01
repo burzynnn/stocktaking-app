@@ -16,7 +16,10 @@ export default class ErrorMiddleware {
                 return res.status(400).send(message);
             }
 
-            req.flash("errors", validationErrors);
+            /* eslint-disable-next-line no-underscore-dangle */
+            delete req.body._csrf;
+            req.flash("inputs", req.body);
+            req.flash("errors", validationErrors.get("body").details);
 
             return res.status(422).redirect("back");
         }
