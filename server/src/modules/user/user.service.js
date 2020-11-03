@@ -1,11 +1,9 @@
 import dayjs from "dayjs";
 import { Op } from "sequelize";
 
-import userModel from "./user.model";
-
 class UserService {
-    constructor(uM) {
-        this.userModel = uM;
+    constructor(userModel) {
+        this.userModel = userModel;
     }
 
     create = ({
@@ -81,4 +79,4 @@ class UserService {
     });
 }
 
-export default new UserService(userModel);
+export default UserService;

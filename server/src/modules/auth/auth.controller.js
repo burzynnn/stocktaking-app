@@ -1,21 +1,22 @@
 import { hash as argonHash, verify as argonVerify } from "argon2";
 import dayjs from "dayjs";
 
-import companyService from "../company/company.service";
-import userService from "../user/user.service";
-import mailer from "../../loaders/sendgrid.loader";
-
 import generateHash from "../../utils/generateHash";
 import generateExpirationDate from "../../utils/generateExpirationDate";
 
 class AuthController {
-    constructor(cS, uS, mailingUtil) {
-        this.companyService = cS;
-        this.userService = uS;
+    constructor(companyService, userService, mailingUtil) {
+        this.companyService = companyService;
+        this.userService = userService;
         this.mailer = mailingUtil;
     }
 
-    getLogin = (req, res) => res.render("modules/auth/login", { title: "Log in!", csrf: req.csrfToken() });
+    getLogin = (req, res) => res.render("modules/auth/login", {
+        title: "Log in!",
+        csrf: req.csrfToken(),
+        errors: req.flash("errors"),
+        inputs: req.flash("inputs")[0],
+    });
 
     postLogin = async (req, res, next) => {
         const { email, password } = req.body;
@@ -219,4 +220,4 @@ class AuthController {
     }
 }
 
-export default new AuthController(companyService, userService, mailer);
+export default AuthController;

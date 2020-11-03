@@ -1,10 +1,20 @@
 import { Router } from "express";
 import { celebrate, Segments } from "celebrate";
 
-import authController from "./auth.controller";
+import AuthController from "./auth.controller";
 import AuthValidator from "./auth.validator";
+import CompanyService from "../company/company.service";
+import companyModel from "../company/company.model";
+import UserService from "../user/user.service";
+import userModel from "../user/user.model";
+import mailingUtil from "../../loaders/sendgrid.loader";
 
 const router = Router();
+const authController = new AuthController(
+    new CompanyService(companyModel),
+    new UserService(userModel),
+    mailingUtil,
+);
 
 router.route("/login")
     .get(authController.getLogin)

@@ -1,11 +1,9 @@
 import { Op } from "sequelize";
 import dayjs from "dayjs";
 
-import companyModel from "./company.model";
-
 class CompanyService {
-    constructor(cM) {
-        this.companyModel = cM;
+    constructor(companyModel) {
+        this.companyModel = companyModel;
     }
 
     findAll = () => this.companyModel.findAll();
@@ -46,4 +44,4 @@ class CompanyService {
     });
 }
 
-export default new CompanyService(companyModel);
+export default CompanyService;
