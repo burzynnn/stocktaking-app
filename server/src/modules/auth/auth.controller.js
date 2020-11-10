@@ -1,4 +1,4 @@
-import { hash as argonHash, verify as argonVerify } from "argon2";
+import argon2 from "argon2";
 import dayjs from "dayjs";
 
 import generateHash from "../../utils/generateHash";
@@ -33,7 +33,7 @@ class AuthController {
             if (!foundUser.active) {
                 return res.send("<h1>You didn't activate your account.</h1>");
             }
-            if (!await argonVerify(foundUser.password, password)) {
+            if (!await argon2.verify(foundUser.password, password)) {
                 return res.send("<h1>Wrong password.</h1>");
             }
 
@@ -95,7 +95,7 @@ class AuthController {
             const userActivationHash = await generateHash(128);
             const userActivationExpirationDate = generateExpirationDate(1);
 
-            const hashedPassword = await argonHash(userPassword);
+            const hashedPassword = await argon2.hash(userPassword);
             const createdUser = await this.userService.create({
                 name: userName,
                 email: userEmail,
@@ -207,7 +207,7 @@ class AuthController {
                 return res.send("<h1>Activation expired.</h1>");
             }
 
-            const hashedPassword = await argonHash(newPassword);
+            const hashedPassword = await argon2.hash(newPassword);
             foundUser.password = hashedPassword;
             foundUser.password_reset_hash = null;
             foundUser.password_reset_date = null;
