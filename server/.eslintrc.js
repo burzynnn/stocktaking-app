@@ -3,6 +3,7 @@ module.exports = {
     env: {
         es2020: true,
         node: true,
+        jest: true,
     },
     extends: ["airbnb-base"],
     parserOptions: {
