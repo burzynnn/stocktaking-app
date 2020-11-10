@@ -4,14 +4,9 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-    entry: ["./src/index.js"],
     target: "node",
     node: {
         __dirname: false,
-    },
-    output: {
-        path: path.resolve(__dirname, "dist"),
-        filename: "main.bundle.js",
     },
     externals: [nodeExternals()],
     module: {
