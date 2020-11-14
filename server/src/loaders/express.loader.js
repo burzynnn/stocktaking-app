@@ -36,7 +36,7 @@ app.use(csrf());
 app.use(flash());
 
 app.use(express.static(join(__dirname, "public")));
-app.set("views", join(__dirname, "public", "views"));
+app.set("views", join(__dirname, "public", "views", "modules"));
 app.set("view engine", "pug");
 
 app.use("/", indexRouter);

@@ -11,7 +11,7 @@ class AuthController {
         this.mailer = mailingUtil;
     }
 
-    getLogin = (req, res) => res.render("modules/auth/login", {
+    getLogin = (req, res) => res.render("auth/login", {
         title: "Log in!",
         csrf: req.csrfToken(),
         errors: req.flash("errors"),
@@ -47,7 +47,7 @@ class AuthController {
         }
     }
 
-    getRegister = (req, res) => res.render("modules/auth/register", { title: "Register", csrf: req.csrfToken() });
+    getRegister = (req, res) => res.render("auth/register", { title: "Register", csrf: req.csrfToken() });
 
     postRegister = async (req, res, next) => {
         const {
@@ -155,7 +155,7 @@ class AuthController {
         }
     }
 
-    getForgotPassword = async (req, res) => res.render("modules/auth/forgot-password", { title: "Forgot password", csrf: req.csrfToken() });
+    getForgotPassword = async (req, res) => res.render("auth/forgot-password", { title: "Forgot password", csrf: req.csrfToken() });
 
     /* eslint-disable consistent-return */
     postForgotPassword = async (req, res, next) => {
@@ -192,7 +192,7 @@ class AuthController {
         }
     }
 
-    getResetPassword = (req, res) => res.render("modules/auth/reset-password", { title: "Reset password", csrf: req.csrfToken() });
+    getResetPassword = (req, res) => res.render("auth/reset-password", { title: "Reset password", csrf: req.csrfToken() });
 
     postResetPassword = async (req, res, next) => {
         const { hash } = req.query;
