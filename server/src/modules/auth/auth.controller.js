@@ -27,14 +27,11 @@ class AuthController {
 
         try {
             const foundUser = await this.userService.findOneByEmail(email);
-            if (!foundUser) {
-                return res.send("<h1>No user found with provided email.</h1>");
+            if (!foundUser || !await argon2.verify(foundUser.password, password)) {
+                return res.send("<h1>Incorrect email or password.</h1>");
             }
             if (!foundUser.active) {
-                return res.send("<h1>You didn't activate your account.</h1>");
-            }
-            if (!await argon2.verify(foundUser.password, password)) {
-                return res.send("<h1>Wrong password.</h1>");
+                return res.send("<h1>Account not activated.</h1>");
             }
 
             req.session.loggedIn = true;
