@@ -14,7 +14,7 @@ class AuthController {
     getLogin = (req, res) => res.render("auth/login", {
         title: "Log in!",
         csrf: req.csrfToken(),
-        errors: req.flash("errors"),
+        errors: req.flash("errors")[0],
         inputs: req.flash("inputs")[0],
     });
 
@@ -47,7 +47,12 @@ class AuthController {
         }
     }
 
-    getRegister = (req, res) => res.render("auth/register", { title: "Register", csrf: req.csrfToken() });
+    getRegister = (req, res) => res.render("auth/register", {
+        title: "Register",
+        csrf: req.csrfToken(),
+        errors: req.flash("errors")[0],
+        inputs: req.flash("inputs")[0],
+    });
 
     postRegister = async (req, res, next) => {
         const {
@@ -155,7 +160,12 @@ class AuthController {
         }
     }
 
-    getForgotPassword = async (req, res) => res.render("auth/forgot-password", { title: "Forgot password", csrf: req.csrfToken() });
+    getForgotPassword = async (req, res) => res.render("auth/forgot-password", {
+        title: "Forgot password",
+        csrf: req.csrfToken(),
+        errors: req.flash("errors")[0],
+        inputs: req.flash("inputs")[0],
+    });
 
     /* eslint-disable consistent-return */
     postForgotPassword = async (req, res, next) => {
@@ -192,7 +202,12 @@ class AuthController {
         }
     }
 
-    getResetPassword = (req, res) => res.render("auth/reset-password", { title: "Reset password", csrf: req.csrfToken() });
+    getResetPassword = (req, res) => res.render("auth/reset-password", {
+        title: "Reset password",
+        csrf: req.csrfToken(),
+        errors: req.flash("errors")[0],
+        inputs: req.flash("inputs")[0],
+    });
 
     postResetPassword = async (req, res, next) => {
         const { hash } = req.query;
