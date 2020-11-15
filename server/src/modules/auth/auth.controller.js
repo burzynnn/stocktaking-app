@@ -26,7 +26,7 @@ class AuthController {
         }
 
         try {
-            const foundUser = await this.userService.findOneByEmail(email);
+            const foundUser = await this.userService.findOneByEmail(email, ["uuid", "name", "password", "active", "company_uuid", "user_type_uuid"]);
             if (!foundUser || !await argon2.verify(foundUser.password, password)) {
                 return res.send("<h1>Incorrect email or password.</h1>");
             }
@@ -63,7 +63,7 @@ class AuthController {
             // TODO: swap res.send with res.render
 
             // company
-            const companyDuplicate = await this.companyService.findOneByEmail(companyEmail);
+            const companyDuplicate = await this.companyService.findOneByEmail(companyEmail, ["uuid"]);
             if (companyDuplicate) {
                 return res.send("<h1>Company with this email has been already registered.");
             }
@@ -91,7 +91,7 @@ class AuthController {
             await this.mailer.sendMail(companyMsg);
 
             // user
-            const userDuplicate = await this.userService.findOneByEmail(userEmail);
+            const userDuplicate = await this.userService.findOneByEmail(userEmail, ["uuid"]);
             if (userDuplicate) {
                 return res.send("<h1>User with this email has been already registered</h1>");
             }
@@ -142,7 +142,7 @@ class AuthController {
 
         try {
             const service = type === "company" ? this.companyService : this.userService;
-            const foundRow = await service.findOneByActivationHash(hash);
+            const foundRow = await service.findOneByActivationHash(hash, ["uuid", "activation_expiration_date"]);
             if (!foundRow) {
                 return res.send(`<h1>${type} not found.</h1>`);
             }
@@ -173,7 +173,7 @@ class AuthController {
         res.send("<h1>Head to your email account and check if message arrived.</h1>");
 
         try {
-            const foundUser = await this.userService.findOneByEmail(email);
+            const foundUser = await this.userService.findOneByEmail(email, ["uuid", "email"]);
             if (foundUser) {
                 const passwordResetHash = await generateHash(128);
                 const passwordResetExpirationDate = generateExpirationDate(1);
@@ -213,7 +213,7 @@ class AuthController {
         const { newPassword } = req.body;
 
         try {
-            const foundUser = await this.userService.findOneByPasswordResetHash(hash);
+            const foundUser = await this.userService.findOneByPasswordResetHash(hash, ["uuid", "password_reset_expiration_date"]);
             if (!foundUser) {
                 return res.send("<h1>No user found by provided hash.</h1>");
             }
