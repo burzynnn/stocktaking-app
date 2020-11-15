@@ -10,16 +10,16 @@ export default class ErrorMiddleware {
         if (isCelebrateError(err)) {
             const validationErrors = err.details;
 
-            if (validationErrors.has("query")) {
-                let message = "";
-                validationErrors.get("query").details.forEach((e) => { message += `Query parameter ${e.message}. `; });
-                return res.status(400).send(message);
-            }
+            const errors = {
+                body: validationErrors.get("body")?.details,
+                query: validationErrors.get("query")?.details,
+                params: validationErrors.get("params")?.details,
+            };
 
             /* eslint-disable-next-line no-underscore-dangle */
             delete req.body._csrf;
             req.flash("inputs", req.body);
-            req.flash("errors", validationErrors.get("body").details);
+            req.flash("errors", errors);
 
             return res.status(422).redirect("back");
         }
