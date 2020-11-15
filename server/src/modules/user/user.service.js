@@ -27,28 +27,28 @@ class UserService {
         user_type_uuid: userTypeUUID,
     });
 
-    findOneByEmail = (email) => this.userModel.findOne({
+    findOneByEmail = (email, attributes) => this.userModel.findOne({
         where: {
             email,
         },
-        attributes: ["uuid", "email", "password", "active", "user_type_uuid"],
+        attributes,
     });
 
-    findOneByPasswordResetHash = (hash) => this.userModel.findOne({
+    findOneByPasswordResetHash = (hash, attributes) => this.userModel.findOne({
         where: {
             password_reset_hash: hash,
         },
-        attributes: ["uuid", "password", "password_reset_hash", "password_reset_expiration_date"],
+        attributes,
     });
 
-    findOneByActivationHash = (hash) => this.userModel.findOne({
+    findOneByActivationHash = (hash, attributes) => this.userModel.findOne({
         where: {
             activation_hash: hash,
         },
-        attributes: ["uuid", "active", "activation_hash", "activation_expiration_date"],
+        attributes,
     });
 
-    findOwnerByCompanyUUID = (companyUUID) => this.userModel.findOne({
+    findOwnerByCompanyUUID = (companyUUID, attributes) => this.userModel.findOne({
         where: {
             company_uuid: companyUUID,
         },
@@ -59,10 +59,10 @@ class UserService {
                 type: "owner",
             },
         },
-        attributes: ["uuid", "company_uuid"],
+        attributes,
     });
 
-    findAllExpiredOwners = () => this.userModel.findAll({
+    findAllExpiredOwners = (attributes) => this.userModel.findAll({
         where: {
             activation_expiration_date: {
                 [Op.lt]: dayjs().format(),
@@ -75,7 +75,7 @@ class UserService {
                 type: "owner",
             },
         },
-        attributes: ["uuid", "company_uuid"],
+        attributes,
     });
 }
 
