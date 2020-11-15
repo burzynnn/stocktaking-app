@@ -7,12 +7,15 @@ import CompanyService from "../company/company.service";
 import companyModel from "../company/company.model";
 import UserService from "../user/user.service";
 import userModel from "../user/user.model";
+import UserTypeService from "../user_type/user_type.service";
+import userTypeModel from "../user_type/user_type.model";
 import mailingUtil from "../../loaders/sendgrid.loader";
 
 const router = Router();
 const authController = new AuthController(
     new CompanyService(companyModel),
     new UserService(userModel),
+    new UserTypeService(userTypeModel),
     mailingUtil,
 );
 
