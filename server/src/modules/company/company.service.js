@@ -20,27 +20,27 @@ class CompanyService {
         activation_expiration_date: timestamp,
     });
 
-    findOneByEmail = (email) => this.companyModel.findOne({
+    findOneByEmail = (email, attributes) => this.companyModel.findOne({
         where: {
             official_email: email,
         },
-        attributes: ["official_email"],
+        attributes,
     });
 
-    findOneByActivationHash = (hash) => this.companyModel.findOne({
+    findOneByActivationHash = (hash, attributes) => this.companyModel.findOne({
         where: {
             activation_hash: hash,
         },
-        attributes: ["uuid", "active", "activation_hash", "activation_expiration_date"],
+        attributes,
     });
 
-    findAllExpired = () => this.companyModel.findAll({
+    findAllExpired = (attributes) => this.companyModel.findAll({
         where: {
             activation_expiration_date: {
                 [Op.lt]: dayjs().format(),
             },
         },
-        attributes: ["uuid", "activation_expiration_date"],
+        attributes,
     });
 }
 
