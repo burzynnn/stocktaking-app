@@ -22,7 +22,7 @@ class AuthController {
         const { email, password } = req.body;
 
         if (req.session.loggedIn) {
-            return res.redirect("/");
+            return res.redirect("/dashboard");
         }
 
         try {
@@ -35,10 +35,12 @@ class AuthController {
             }
 
             req.session.loggedIn = true;
-            req.session.uuid = foundUser.uuid;
+            req.session.user_uuid = foundUser.uuid;
+            req.session.user_name = foundUser.name;
+            req.session.user_company_uuid = foundUser.company_uuid;
             req.session.user_type_uuid = foundUser.user_type_uuid;
 
-            return res.redirect("/");
+            return res.redirect("/dashboard");
         } catch (err) {
             return next(err);
         }
