@@ -5,9 +5,10 @@ import generateHash from "../../utils/generateHash";
 import generateExpirationDate from "../../utils/generateExpirationDate";
 
 class AuthController {
-    constructor(companyService, userService, mailingUtil) {
+    constructor(companyService, userService, userTypeService, mailingUtil) {
         this.companyService = companyService;
         this.userService = userService;
+        this.userTypeService = userTypeService;
         this.mailer = mailingUtil;
     }
 
@@ -34,11 +35,13 @@ class AuthController {
                 return res.send("<h1>Account not activated.</h1>");
             }
 
+            const userType = await this.userTypeService.findOneByUUID(foundUser.user_type_uuid, ["type"]);
+
             req.session.loggedIn = true;
             req.session.user_uuid = foundUser.uuid;
             req.session.user_name = foundUser.name;
             req.session.user_company_uuid = foundUser.company_uuid;
-            req.session.user_type_uuid = foundUser.user_type_uuid;
+            req.session.user_type = userType.type;
 
             return res.redirect("/dashboard");
         } catch (err) {
