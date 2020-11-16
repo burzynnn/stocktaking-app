@@ -38,10 +38,10 @@ class AuthController {
             const userType = await this.userTypeService.findOneByUUID(foundUser.user_type_uuid, ["type"]);
 
             req.session.loggedIn = true;
-            req.session.user_uuid = foundUser.uuid;
-            req.session.user_name = foundUser.name;
-            req.session.user_company_uuid = foundUser.company_uuid;
-            req.session.user_type = userType.type;
+            req.session.userUUID = foundUser.uuid;
+            req.session.userName = foundUser.name;
+            req.session.userCompanyUUID = foundUser.company_uuid;
+            req.session.userType = userType.type;
 
             return res.redirect("/dashboard");
         } catch (err) {
