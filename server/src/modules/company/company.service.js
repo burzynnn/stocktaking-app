@@ -42,6 +42,13 @@ class CompanyService {
         },
         attributes,
     });
+
+    findOneByUUID = (uuid, attributes) => this.companyModel.findOne({
+        where: {
+            uuid,
+        },
+        attributes,
+    });
 }
 
 export default CompanyService;
