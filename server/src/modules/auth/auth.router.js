@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { celebrate, Segments } from "celebrate";
 
 import AuthController from "./auth.controller";
 import AuthValidator from "./auth.validator";
@@ -18,41 +17,39 @@ const authController = new AuthController(
     new UserTypeService(userTypeModel),
     mailingUtil,
 );
+const authValidator = new AuthValidator();
 
 router.route("/login")
     .get(authController.getLogin)
     .post(
-        celebrate({ [Segments.BODY]: AuthValidator.postLogin.body }),
+        authValidator.returnValidator("postLogin"),
         authController.postLogin,
     );
 
 router.route("/register")
     .get(authController.getRegister)
     .post(
-        celebrate({ [Segments.BODY]: AuthValidator.postRegister.body }),
+        authValidator.returnValidator("postRegister"),
         authController.postRegister,
     );
 
 router.get("/logout", authController.getLogout);
 
 router.get("/registration-verification",
-    celebrate({ [Segments.QUERY]: AuthValidator.getRegistrationVerification.query }),
+    authValidator.returnValidator("getRegistrationVerification"),
     authController.getRegistrationVerification);
 
 router.route("/forgot-password")
     .get(authController.getForgotPassword)
     .post(
-        celebrate({ [Segments.BODY]: AuthValidator.postForgotPassword.body }),
+        authValidator.returnValidator("postForgotPassword"),
         authController.postForgotPassword,
     );
 
 router.route("/reset-password")
     .get(authController.getResetPassword)
     .post(
-        celebrate({
-            [Segments.QUERY]: AuthValidator.postResetPassword.query,
-            [Segments.BODY]: AuthValidator.postResetPassword.body,
-        }),
+        authValidator.returnValidator("postResetPassword"),
         authController.postResetPassword,
     );
 
