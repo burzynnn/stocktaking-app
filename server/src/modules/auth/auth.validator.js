@@ -45,7 +45,9 @@ export default class AuthValidator extends Validator {
         }),
         body: Joi.object().options({ abortEarly: false }).keys({
             newPassword: Joi.string().min(8).trim().required(),
-            repeatNewPassword: Joi.any().valid(Joi.ref("newPassword")).required(),
+            repeatNewPassword: Joi.any().valid(Joi.ref("newPassword")).required().messages({
+                "any.only": "\"newPassword\" value has to match \"repeatNewPassword\" value",
+            }),
             _csrf: this.getField("_csrf"),
         }),
     }
