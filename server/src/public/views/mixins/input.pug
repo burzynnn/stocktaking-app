@@ -1,0 +1,14 @@
+mixin input(labelText, options)
+    - var name = options.name || options.id
+    label(for=name) #{labelText}: 
+    input(
+        type=options.type || "text",
+        placeholder=options.placeholder,
+        id=name,
+        name=name, 
+        value=`${(inputs && inputs[name]) ? inputs[name] : ""}`
+    )
+    if errors && errors.body
+        each err in errors.body
+            if err.path[0] === name
+                p #{err.message}
