@@ -18,7 +18,9 @@ export default class AuthValidator extends Validator {
             userName: Joi.string().min(1).trim().required(),
             userEmail: this.getField("email"),
             userPassword: Joi.string().min(8).trim().required(),
-            userRepeatPassword: Joi.any().valid(Joi.ref("userPassword")).required(),
+            userRepeatPassword: Joi.any().valid(Joi.ref("userPassword")).required().messages({
+                "any.only": "\"userPassword\" value has to match \"userRepeatPassword\" value",
+            }),
             _csrf: this.getField("_csrf"),
         }),
     }
