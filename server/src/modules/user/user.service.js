@@ -1,6 +1,9 @@
 import dayjs from "dayjs";
 import { Op } from "sequelize";
 
+import UserType from "../user_type/user_type.model";
+import Company from "../company/company.model";
+
 class UserService {
     constructor(userModel) {
         this.userModel = userModel;
@@ -26,6 +29,21 @@ class UserService {
         company_uuid: companyUUID,
         user_type_uuid: userTypeUUID,
     });
+
+    findOneByUUID = (uuid, attributes) => this.userModel.findOne({
+        where: {
+            uuid,
+        },
+        attributes,
+        include: [{
+            model: UserType,
+            as: "user_has_user_type",
+            attributes: ["type"],
+        }, {
+            model: Company,
+            attributes: ["name"],
+        }],
+    })
 
     findOneByEmail = (email, attributes) => this.userModel.findOne({
         where: {
