@@ -16,6 +16,7 @@ import sessionMiddleware from "../middlewares/session.middleware";
 import indexRouter from "../modules/index/index.router";
 import authRouter from "../modules/auth/auth.router";
 import companyRouter from "../modules/company/company.router";
+import userRouter from "../modules/user/user.router";
 
 import ErrorMiddleware from "../middlewares/error.middleware";
 
@@ -43,6 +44,7 @@ app.set("view engine", "pug");
 app.use("/", indexRouter);
 app.use("/auth", authRouter);
 app.use("/dashboard/company", companyRouter);
+app.use("/dashboard/users", userRouter);
 
 app.use("*", ErrorMiddleware.notFound);
 app.use(ErrorMiddleware.exceptionHandler);
