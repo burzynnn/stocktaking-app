@@ -18,6 +18,7 @@ export default class CompanyController {
                 csrf: req.csrfToken(),
                 inputs: { name, email },
                 errors: req.flash("errors")[0],
+                messages: req.flash("messages"),
             });
         } catch (err) {
             return next(err);
@@ -43,7 +44,8 @@ export default class CompanyController {
                 await foundCompany.save();
             }
 
-            return res.render("company/edit", { title: "Edit company", csrf: req.csrfToken(), inputs: { name: foundCompany.name, email: foundCompany.official_email } });
+            req.flash("messages", [{ type: "Success", text: "Company information updated." }]);
+            return res.redirect("/dashboard/company/edit");
         } catch (err) {
             return next(err);
         }

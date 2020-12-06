@@ -17,6 +17,7 @@ class AuthController {
         csrf: req.csrfToken(),
         errors: req.flash("errors")[0],
         inputs: req.flash("inputs")[0],
+        messages: req.flash("messages"),
     });
 
     postLogin = async (req, res, next) => {
@@ -28,11 +29,14 @@ class AuthController {
 
         try {
             const foundUser = await this.userService.findOneByEmail(email, ["uuid", "name", "password", "active", "company_uuid", "user_type_uuid"]);
+
             if (!foundUser || !await argon2.verify(foundUser.password, password)) {
-                return res.send("<h1>Incorrect email or password.</h1>");
+                req.flash("messages", [{ type: "Error", text: "Incorrect email or password." }]);
+                return res.redirect("/auth/login");
             }
             if (!foundUser.active) {
-                return res.send("<h1>Account not activated.</h1>");
+                req.flash("messages", [{ type: "Error", text: "Account not activated." }]);
+                return res.redirect("/auth/login");
             }
 
             const userType = await this.userTypeService.findOneByUUID(foundUser.user_type_uuid, ["type"]);
@@ -54,6 +58,7 @@ class AuthController {
         csrf: req.csrfToken(),
         errors: req.flash("errors")[0],
         inputs: req.flash("inputs")[0],
+        messages: req.flash("messages"),
     });
 
     postRegister = async (req, res, next) => {
@@ -63,12 +68,12 @@ class AuthController {
 
         try {
             // TODO: one error should revert all inserts !!!
-            // TODO: swap res.send with res.render
 
             // company
             const companyDuplicate = await this.companyService.findOneByEmail(companyEmail, ["uuid"]);
             if (companyDuplicate) {
-                return res.send("<h1>Company with this email has been already registered.");
+                req.flash("messages", [{ type: "Error", text: "Company account with passed email has been already created." }]);
+                return res.redirect("/auth/register");
             }
 
             const companyActivationHash = await generateHash(128);
@@ -96,7 +101,8 @@ class AuthController {
             // user
             const userDuplicate = await this.userService.findOneByEmail(userEmail, ["uuid"]);
             if (userDuplicate) {
-                return res.send("<h1>User with this email has been already registered</h1>");
+                req.flash("messages", [{ type: "Error", text: "User account with passed email has been already created." }]);
+                return res.redirect("/auth/register");
             }
 
             const userActivationHash = await generateHash(128);
@@ -125,7 +131,8 @@ class AuthController {
             };
             await this.mailer.sendMail(userMsg);
 
-            return res.send("<h1>Your company has been registered and user created.</h1>");
+            req.flash("messages", [{ type: "Success", text: "Account created. Head to both company and user email and verify your credentials." }]);
+            return res.redirect("/auth/register");
         } catch (err) {
             return next(err);
         }
@@ -167,13 +174,15 @@ class AuthController {
         csrf: req.csrfToken(),
         errors: req.flash("errors")[0],
         inputs: req.flash("inputs")[0],
+        messages: req.flash("messages"),
     });
 
     /* eslint-disable consistent-return */
     postForgotPassword = async (req, res, next) => {
         const { email } = req.body;
 
-        res.send("<h1>Head to your email account and check if message arrived.</h1>");
+        req.flash("messages", [{ type: "Warning", text: "Due to security reasons we can not confirm that provided email was correct." }, { type: "Information", text: "Head to your email account and check if reset password email arrived. If not you probably used wrong email address." }]);
+        res.redirect("/auth/forgot-password");
 
         try {
             const foundUser = await this.userService.findOneByEmail(email, ["uuid", "email"]);
@@ -209,6 +218,7 @@ class AuthController {
         csrf: req.csrfToken(),
         errors: req.flash("errors")[0],
         inputs: req.flash("inputs")[0],
+        messages: req.flash("messages"),
     });
 
     postResetPassword = async (req, res, next) => {
@@ -218,19 +228,22 @@ class AuthController {
         try {
             const foundUser = await this.userService.findOneByPasswordResetHash(hash, ["uuid", "password_reset_expiration_date"]);
             if (!foundUser) {
-                return res.send("<h1>No user found by provided hash.</h1>");
+                req.flash("messages", [{ type: "Error", text: "No user found by provided hash." }]);
+                return res.redirect(`/auth${req.url}`);
             }
             if (dayjs().isAfter(dayjs(foundUser.password_reset_expiration_date))) {
-                return res.send("<h1>Activation expired.</h1>");
+                req.flash("messages", [{ type: "Error", text: "Activation expired." }]);
+                return res.redirect(`/auth${req.url}`);
             }
 
             const hashedPassword = await argon2.hash(newPassword);
             foundUser.password = hashedPassword;
             foundUser.password_reset_hash = null;
-            foundUser.password_reset_date = null;
+            foundUser.password_reset_expiration_date = null;
             await foundUser.save();
 
-            return res.send("<h1>Password changed successfully.</h1>");
+            req.flash("messages", [{ type: "Success", text: "Password changed successfully. You can login now using new password." }]);
+            return res.redirect("/auth/login");
         } catch (err) {
             return next(err);
         }

@@ -35,6 +35,7 @@ export default class UserController {
                     companyName,
                 },
                 errors: req.flash("errors")[0],
+                messages: req.flash("messages"),
             });
         } catch (err) {
             return next(err);
@@ -69,28 +70,8 @@ export default class UserController {
                 await foundUser.save();
             }
 
-            const {
-                name,
-                email,
-                createdAt,
-                user_has_user_type: { type },
-                company: { name: companyName },
-            } = foundUser;
-
-            const accountCreationDate = dayjs(createdAt).format("HH:mm DD-MM-YYYY");
-
-            return res.render("user/me", {
-                title: name,
-                csrf: req.csrfToken(),
-                inputs: {
-                    name,
-                    email,
-                    accountCreationDate,
-                    type,
-                    companyName,
-                },
-                errors: [req.flash("errors")[0]],
-            });
+            req.flash("messages", [{ type: "Success", text: "Updated your profile." }]);
+            return res.redirect("/dashboard/users/me");
         } catch (err) {
             return next(err);
         }
