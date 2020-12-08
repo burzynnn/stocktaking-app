@@ -39,7 +39,7 @@ class AuthController {
                 return res.redirect("/auth/login");
             }
 
-            const userType = await this.userTypeService.findOneByUUID(foundUser.user_type_uuid, ["type"]);
+            const userType = await foundUser.getUser_has_user_type();
 
             req.session.loggedIn = true;
             req.session.userUUID = foundUser.uuid;
