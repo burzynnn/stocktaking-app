@@ -42,35 +42,64 @@ export default class UserController {
         }
     }
 
-    postEditSelfUser = async (req, res, next) => {
+    postEditUserName = async (req, res, next) => {
         const { userUUID } = req.session;
-        const { name: newName, email: newEmail, password: newPassword } = req.body;
+        const { name } = req.body;
         try {
-            const foundUser = await this.userService.findOneByUUID(userUUID, ["uuid", "name", "email", "password", "createdAt", "company_uuid"]);
+            const foundUser = await this.userService.findOneByUUID(userUUID, ["uuid", "name"]);
 
-            let hasChanged = false;
-            if (newName !== foundUser.name) {
-                foundUser.name = newName;
-                hasChanged = true;
-                req.session.userName = newName;
-                res.locals.userData.userName = newName;
+            if (foundUser.name === name) {
+                req.flash("messages", [{ type: "Information", text: "We accepted your request to change your user name but it doesn't differ from actual one." }]);
+                return res.redirect("/dashboard/users/me");
             }
-            if (newEmail !== foundUser.email) {
-                foundUser.email = newEmail;
-                hasChanged = true;
-            }
-            if (newPassword !== "") {
-                if (!await argon2.verify(foundUser.password, newPassword)) {
-                    const hashedPassword = await argon2.hash(newPassword);
-                    foundUser.password = hashedPassword;
-                    hasChanged = true;
-                }
-            }
-            if (hasChanged) {
-                await foundUser.save();
-            }
+            foundUser.name = name;
+            await foundUser.save();
+            req.session.userName = name;
+            res.locals.userData.userName = name;
 
-            req.flash("messages", [{ type: "Success", text: "Updated your profile." }]);
+            req.flash("messages", [{ type: "Success", text: "User name changed." }]);
+            return res.redirect("/dashboard/users/me");
+        } catch (err) {
+            return next(err);
+        }
+    }
+
+    postEditUserEmail = async (req, res, next) => {
+        const { userUUID } = req.session;
+        const { email } = req.body;
+        try {
+            const foundUser = await this.userService.findOneByUUID(userUUID, ["uuid", "email"]);
+
+            if (foundUser.email === email) {
+                req.flash("messages", [{ type: "Information", text: "We accepted your request to change your user email but it doesn't differ from actual one." }]);
+                return res.redirect("/dashboard/users/me");
+            }
+            foundUser.email = email;
+            await foundUser.save();
+
+            req.flash("messages", [{ type: "Success", text: "User email changed." }]);
+            return res.redirect("/dashboard/users/me");
+        } catch (err) {
+            return next(err);
+        }
+    }
+
+    postEditUserPassword = async (req, res, next) => {
+        const { userUUID } = req.session;
+        const { password, repeatPassword } = req.body;
+        if (password !== repeatPassword) {
+            req.flash("messages", [{ type: "Error", text: "Passwords aren't the same." }]);
+            return res.redirect("/dashboard/users/me");
+        }
+
+        try {
+            const foundUser = await this.userService.findOneByUUID(userUUID, ["uuid", "password"]);
+
+            const newPassword = await argon2.hash(password);
+            foundUser.password = newPassword;
+            await foundUser.save();
+
+            req.flash("messages", [{ type: "Success", text: "User password changed." }]);
             return res.redirect("/dashboard/users/me");
         } catch (err) {
             return next(err);

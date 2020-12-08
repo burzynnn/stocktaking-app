@@ -14,11 +14,27 @@ router.route("/me")
     .get(
         AuthMiddleware.authenticate,
         userController.getSelfUser,
-    )
+    );
+
+router.route("/me/edit-name")
     .post(
-        userValidator.returnValidator("postEditSelfUser"),
+        userValidator.returnValidator("postEditUserName"),
         AuthMiddleware.authenticate,
-        userController.postEditSelfUser,
+        userController.postEditUserName,
+    );
+
+router.route("/me/edit-email")
+    .post(
+        userValidator.returnValidator("postEditUserEmail"),
+        AuthMiddleware.authenticate,
+        userController.postEditUserEmail,
+    );
+
+router.route("/me/edit-password")
+    .post(
+        userValidator.returnValidator("postEditUserPassword"),
+        AuthMiddleware.authenticate,
+        userController.postEditUserPassword,
     );
 
 export default router;
