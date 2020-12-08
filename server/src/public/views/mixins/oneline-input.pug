@@ -1,0 +1,15 @@
+mixin oneline-input(labelText, buttonText, options)
+    - var name = options.name || options.id
+    label(for=name) #{labelText}: 
+    input(
+        type=options.type || "text",
+        placeholder=options.placeholder,
+        id=name,
+        name=name, 
+        value=`${(inputs && inputs[name]) ? inputs[name] : ""}`
+    )
+    button(type="submit") #{buttonText}
+    if errors && errors.body
+        each err in errors.body
+            if err.path[0] === name
+                p #{labelText} #{err.message.substring(err.message.lastIndexOf("\"") + 1, err.message.length)}
