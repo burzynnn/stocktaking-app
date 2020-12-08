@@ -25,26 +25,41 @@ export default class CompanyController {
         }
     };
 
-    postEditOwnCompany = async (req, res, next) => {
+    postEditCompanyName = async (req, res, next) => {
         const { userCompanyUUID: companyUUID } = req.session;
-        const { name, email } = req.body;
+        const { name } = req.body;
         try {
-            const foundCompany = await this.companyService.findOneByUUID(companyUUID, ["uuid", "name", "official_email"]);
+            const foundCompany = await this.companyService.findOneByUUID(companyUUID, ["uuid", "name"]);
 
-            let hasChanged = false;
-            if (name !== foundCompany.name) {
-                foundCompany.name = name;
-                hasChanged = true;
+            if (foundCompany.name === name) {
+                req.flash("messages", [{ type: "Information", text: "We accepted your request to change company name but it doesn't differ from actual one." }]);
+                return res.redirect("/dashboard/company/edit");
             }
-            if (email !== foundCompany.official_email) {
-                foundCompany.official_email = email;
-                hasChanged = true;
-            }
-            if (hasChanged) {
-                await foundCompany.save();
-            }
+            foundCompany.name = name;
+            await foundCompany.save();
 
-            req.flash("messages", [{ type: "Success", text: "Company information updated." }]);
+            req.flash("messages", [{ type: "Success", text: "Company name changed." }]);
+            return res.redirect("/dashboard/company/edit");
+        } catch (err) {
+            return next(err);
+        }
+    }
+
+    // TODO: changing email requires confirmation from old and new email address
+    postEditCompanyEmail = async (req, res, next) => {
+        const { userCompanyUUID: companyUUID } = req.session;
+        const { email } = req.body;
+        try {
+            const foundCompany = await this.companyService.findOneByUUID(companyUUID, ["uuid", "official_email"]);
+
+            if (foundCompany.official_email === email) {
+                req.flash("messages", [{ type: "Information", text: "We accepted your request to change company email but it doesn't differ from actual one." }]);
+                return res.redirect("/dashboard/company/edit");
+            }
+            foundCompany.official_email = email;
+            await foundCompany.save();
+
+            req.flash("messages", [{ type: "Success", text: "Company email changed." }]);
             return res.redirect("/dashboard/company/edit");
         } catch (err) {
             return next(err);

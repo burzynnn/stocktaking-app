@@ -15,12 +15,22 @@ router.route("/edit")
         AuthMiddleware.authenticate,
         AuthMiddleware.isOwner,
         companyController.getEditOwnCompany,
-    )
+    );
+
+router.route("/edit-name")
     .post(
-        companyValidator.returnValidator("postEditOwnCompany"),
+        companyValidator.returnValidator("postEditCompanyName"),
         AuthMiddleware.authenticate,
         AuthMiddleware.isOwner,
-        companyController.postEditOwnCompany,
+        companyController.postEditCompanyName,
+    );
+
+router.route("/edit-email")
+    .post(
+        companyValidator.returnValidator("postEditCompanyEmail"),
+        AuthMiddleware.authenticate,
+        AuthMiddleware.isOwner,
+        companyController.postEditCompanyEmail,
     );
 
 export default router;
