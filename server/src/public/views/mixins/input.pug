@@ -11,4 +11,4 @@ mixin input(labelText, options)
     if errors && errors.body
         each err in errors.body
             if err.path[0] === name
-                p #{err.message}
+                p #{labelText} #{err.message.substring(err.message.lastIndexOf("\"") + 1, err.message.length)}
