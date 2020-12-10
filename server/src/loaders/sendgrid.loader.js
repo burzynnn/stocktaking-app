@@ -4,7 +4,7 @@ import envConfig from "../config/env.config";
 
 sgMail.setApiKey(envConfig.sendgrid.api_key);
 
-class Mailer {
+class MailSender {
     constructor(sendgrid, fromAddress) {
         this.sg = sendgrid;
         this.from = fromAddress;
@@ -13,4 +13,4 @@ class Mailer {
     sendMail = (opts) => this.sg.send({ from: this.from, ...opts });
 }
 
-export default new Mailer(sgMail, envConfig.sendgrid.send_from);
+export default new MailSender(sgMail, envConfig.sendgrid.send_from);
