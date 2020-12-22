@@ -2,28 +2,28 @@ import { Router } from "express";
 
 import AuthController from "./auth.controller";
 import AuthValidator from "./auth.validator";
+import AuthService from "./auth.service";
 import CompanyService from "../company/company.service";
 import companyModel from "../company/company.model";
 import UserService from "../user/user.service";
 import userModel from "../user/user.model";
-import UserTypeService from "../user_type/user_type.service";
-import userTypeModel from "../user_type/user_type.model";
-import mailingUtil from "../../loaders/sendgrid.loader";
+import MailService from "../mail/mail.service";
+import mailSender from "../../loaders/sendgrid.loader";
 
 const router = Router();
-const authController = new AuthController(
-    new CompanyService(companyModel),
-    new UserService(userModel),
-    new UserTypeService(userTypeModel),
-    mailingUtil,
-);
+const authController = new AuthController({
+    authService: new AuthService({ userModel, companyModel }),
+    companyService: new CompanyService(companyModel),
+    userService: new UserService(userModel),
+    mailService: new MailService(mailSender),
+});
 const authValidator = new AuthValidator();
 
 router.route("/login")
-    .get(authController.getLogin)
+    .get(authController.getLogIn)
     .post(
         authValidator.returnValidator("postLogin"),
-        authController.postLogin,
+        authController.postLogIn,
     );
 
 router.route("/register")
@@ -33,7 +33,7 @@ router.route("/register")
         authController.postRegister,
     );
 
-router.get("/logout", authController.getLogout);
+router.get("/logout", authController.getLogOut);
 
 router.get("/registration-verification",
     authValidator.returnValidator("getRegistrationVerification"),
