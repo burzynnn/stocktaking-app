@@ -19,7 +19,7 @@ export default class AuthValidator extends Validator {
             userEmail: this.getField("email"),
             userPassword: Joi.string().min(8).trim().required(),
             userRepeatPassword: Joi.any().valid(Joi.ref("userPassword")).required().messages({
-                "any.only": "\"repeatPassword\" needs to match new password field value.",
+                "any.only": "\"repeatPassword\" value needs to match password provided in previous input.",
             }),
             _csrf: this.getField("_csrf"),
         }),
@@ -46,7 +46,7 @@ export default class AuthValidator extends Validator {
         body: Joi.object().options({ abortEarly: false }).keys({
             newPassword: Joi.string().min(8).trim().required(),
             repeatNewPassword: Joi.any().valid(Joi.ref("newPassword")).required().messages({
-                "any.only": "\"newPassword\" value has to match \"repeatNewPassword\" value",
+                "any.only": "\"newPassword\" value needs to match password provided in first input.",
             }),
             _csrf: this.getField("_csrf"),
         }),
