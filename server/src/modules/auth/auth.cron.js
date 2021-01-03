@@ -10,7 +10,7 @@ const companyService = new CompanyService({ companyModel });
 const userService = new UserService({ userModel });
 
 const removeNotActivatedAccounts = new CronJob("0 0 * * * *", async () => {
-    logger.info("Clearing not activated accounts.", { label: "auth_cron" });
+    logger.info("Clearing not activated accounts.", { label: "auth-cron" });
 
     // first find all expired companies and delete it and its owner
     const allExpiredCompanies = await companyService.getAllWithExpiredActivation();
