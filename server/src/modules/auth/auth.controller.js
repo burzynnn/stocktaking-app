@@ -4,11 +4,13 @@ export default class AuthController {
         mailService,
         userService,
         companyService,
+        actionMessages,
     }) {
         this.authService = authService;
         this.userService = userService;
         this.companyService = companyService;
         this.mailService = mailService;
+        this.actionMessages = actionMessages;
     }
 
     getLogIn = (req, res) => res.render("auth/login", {
@@ -24,6 +26,7 @@ export default class AuthController {
         try {
             const loggedInUserData = await this.authService.logIn({ email, password });
             Object.assign(req.session, loggedInUserData);
+
             return res.redirect("/dashboard");
         } catch (err) {
             return next(err);
@@ -42,6 +45,7 @@ export default class AuthController {
         const {
             companyName, companyEmail, userName, userEmail, userPassword,
         } = req.body;
+
         try {
             const registeredCompany = await this.companyService.create({
                 name: companyName,
@@ -64,7 +68,7 @@ export default class AuthController {
                 activationHash: registeredOwner.activation_hash,
             });
 
-            req.flash("messages", [{ type: "Success", text: "Account created. Head to both company and user email, verify your credentials and log in!" }]);
+            req.flash("messages", this.actionMessages.convertMessages("as01", "ai01"));
             return res.redirect("/auth/login");
         } catch (err) {
             return next(err);
@@ -76,7 +80,9 @@ export default class AuthController {
             if (err) {
                 return next(err);
             }
-            return res.clearCookie("stocktaking.sid").redirect("/");
+
+            req.flash("messages", this.actionMessages.convertMessages("ai02"));
+            return res.clearCookie("stocktaking.sid").redirect("/auth/login");
         });
     }
 
@@ -86,11 +92,13 @@ export default class AuthController {
             if (type === "company") {
                 await this.authService.companyVerifyRegistration({ activationHash: hash });
 
-                req.flash("messages", [{ type: "Success", text: "Company account activated." }, { type: "Information", text: "If you have activated user account, then you can login using it's credentials." }]);
+                req.flash("messages", this.actionMessages.convertMessages("cs03", "ai03"));
             } else if (type === "user") {
                 await this.authService.userVerifyRegistration({ activationHash: hash });
 
-                req.flash("messages", [{ type: "Success", text: "User account activated." }, { type: "Information", text: "You can login below." }]);
+                req.flash("messages", this.actionMessages.convertMessages("us04", "ai04"));
+            } else {
+                req.flash("messages", this.actionMessages.convertMessages("ae08"));
             }
 
             return res.redirect("/auth/login");
@@ -99,7 +107,7 @@ export default class AuthController {
         }
     }
 
-    getForgotPassword = async (req, res) => res.render("auth/forgot-password", {
+    getForgotPassword = (req, res) => res.render("auth/forgot-password", {
         title: "Forgot password",
         csrf: req.csrfToken(),
         errors: req.flash("errors")[0],
@@ -118,7 +126,7 @@ export default class AuthController {
                 passwordResetHash: userPreparedToPasswordReset.password_reset_hash,
             });
 
-            req.flash("messages", [{ type: "Warning", text: "Due to security reasons we can not confirm that provided email was correct." }, { type: "Information", text: "Head to your email account and check if reset password email arrived. If not you probably used wrong email address." }]);
+            req.flash("messages", this.actionMessages.convertMessages("aw01", "ai05"));
             return res.redirect("/auth/forgot-password");
         } catch (err) {
             return next(err);
@@ -143,7 +151,7 @@ export default class AuthController {
                 password: newPassword,
             });
 
-            req.flash("messages", [{ type: "Success", text: "Password changed successfully. You can login now using new password." }]);
+            req.flash("messages", this.actionMessages.convertMessages("as02", "ai06"));
             return res.redirect("/auth/login");
         } catch (err) {
             return next(err);
