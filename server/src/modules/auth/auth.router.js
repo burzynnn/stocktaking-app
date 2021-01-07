@@ -9,13 +9,15 @@ import UserService from "../user/user.service";
 import userModel from "../user/user.model";
 import MailService from "../mail/mail.service";
 import mailSender from "../../loaders/sendgrid.loader";
+import ActionMessages from "../../config/actionMessages.config";
 
 const router = Router();
 const authController = new AuthController({
     authService: new AuthService({ userModel, companyModel }),
-    companyService: new CompanyService(companyModel),
-    userService: new UserService(userModel),
+    companyService: new CompanyService({ companyModel }),
+    userService: new UserService({ userModel }),
     mailService: new MailService(mailSender),
+    actionMessages: new ActionMessages(),
 });
 const authValidator = new AuthValidator();
 

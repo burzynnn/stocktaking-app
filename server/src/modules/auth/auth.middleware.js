@@ -13,6 +13,8 @@ export default {
 
             return next();
         }
+
+        req.flash("messages", [{ type: "Error", text: "You need to log in first." }]);
         return res.redirect("/auth/login");
     },
 

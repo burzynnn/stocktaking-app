@@ -21,7 +21,11 @@ export default class ErrorMiddleware {
             req.flash("inputs", req.body);
             req.flash("errors", errors);
 
-            return res.status(422).redirect("back");
+            return res.redirect("back");
+        }
+        if (err.name === "ProcessingError") {
+            req.flash("messages", err.causes);
+            return res.redirect("back");
         }
 
         logger.error(err, { label: "error" });
