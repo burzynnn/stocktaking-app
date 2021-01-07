@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 
 import generateHash from "../../utils/generateHash";
 import generateExpirationDate from "../../utils/generateExpirationDate";
+import ProcessingError from "../../utils/processingError";
 
 export default class AuthService {
     constructor({ userModel, companyModel }) {
@@ -17,14 +18,17 @@ export default class AuthService {
             },
             attributes: ["uuid", "name", "password", "active", "company_uuid", "user_type_uuid"],
         });
+        if (!foundUser) {
+            throw new ProcessingError("ae01");
+        }
 
         const isProvidedPasswordCorrect = await argon2.verify(foundUser.password, providedPassword);
-        if (!foundUser || !isProvidedPasswordCorrect) {
-            throw new Error({ code: 400, message: "Incorrect email or password." });
+        if (!isProvidedPasswordCorrect) {
+            throw new ProcessingError("ae01");
         }
 
         if (!foundUser.active) {
-            throw new Error({ code: 409, message: "Account not active." });
+            throw new ProcessingError("ae02");
         }
 
         const typeOfUser = await foundUser.getUser_has_user_type();
@@ -47,11 +51,11 @@ export default class AuthService {
         });
 
         if (!foundEntity) {
-            throw new Error({ code: 404, message: "We couldn't find your company to verify by provided hash." });
+            throw new ProcessingError("ae03");
         }
 
         if (dayjs().isAfter(dayjs(foundEntity.activation_expiration_date))) {
-            throw new Error({ code: 409, message: "Your registration verify hash expired. Both owner and company account will be deleted soon." });
+            throw new ProcessingError("ae04");
         }
 
         foundEntity.active = true;
@@ -81,7 +85,7 @@ export default class AuthService {
         });
 
         if (!foundUser) {
-            throw new Error({ code: 400, message: "No user found by provided email." });
+            throw new ProcessingError("ue03");
         }
 
         const passwordResetHash = await generateHash(128);
@@ -107,11 +111,11 @@ export default class AuthService {
         });
 
         if (!foundUser) {
-            throw new Error({ code: 400, message: "No user found by provided hash." });
+            throw new ProcessingError("ue03");
         }
 
         if (dayjs().isAfter(dayjs(foundUser.password_reset_expiration_date))) {
-            throw new Error({ code: 409, message: "Password reset hash expired." });
+            throw new ProcessingError("ae05");
         }
 
         const hashedPassword = await argon2.hash(providedNewPassword);
