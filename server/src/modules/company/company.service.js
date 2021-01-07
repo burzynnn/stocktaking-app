@@ -1,54 +1,105 @@
 import { Op } from "sequelize";
 import dayjs from "dayjs";
 
-class CompanyService {
-    constructor(companyModel) {
+import generateHash from "../../utils/generateHash";
+import generateExpirationDate from "../../utils/generateExpirationDate";
+import ProcessingError from "../../utils/processingError";
+
+export default class CompanyService {
+    constructor({ companyModel }) {
         this.companyModel = companyModel;
     }
 
-    findAll = () => this.companyModel.findAll();
+    create = async ({ name: providedName, email: providedEmail }) => {
+        const companyDuplicate = await this.companyModel.findOne({
+            where: {
+                official_email: providedEmail,
+            },
+            attributes: ["uuid"],
+        });
 
-    create = ({
-        name,
-        email,
-        hash,
-        timestamp,
-    }) => this.companyModel.create({
-        name,
-        official_email: email,
-        activation_hash: hash,
-        activation_expiration_date: timestamp,
-    });
+        if (companyDuplicate) {
+            throw new ProcessingError("ce01");
+        }
 
-    findOneByEmail = (email, attributes) => this.companyModel.findOne({
-        where: {
-            official_email: email,
-        },
-        attributes,
-    });
+        const activationHash = await generateHash(128);
+        const activationExpirationDate = generateExpirationDate(1);
 
-    findOneByActivationHash = (hash, attributes) => this.companyModel.findOne({
-        where: {
-            activation_hash: hash,
-        },
-        attributes,
-    });
+        const registeredCompany = await this.companyModel.create({
+            name: providedName,
+            official_email: providedEmail,
+            activation_hash: activationHash,
+            activation_expiration_date: activationExpirationDate,
+        });
 
-    findAllExpired = (attributes) => this.companyModel.findAll({
+        return registeredCompany;
+    }
+
+    getAllWithExpiredActivation = () => this.companyModel.findAll({
         where: {
             activation_expiration_date: {
                 [Op.lt]: dayjs().format(),
             },
         },
-        attributes,
+        attributes: ["uuid"],
     });
 
-    findOneByUUID = (uuid, attributes) => this.companyModel.findOne({
-        where: {
-            uuid,
-        },
-        attributes,
-    });
+    getCompanyToEdit = async ({ companyUUID: providedUUID }) => {
+        const foundCompany = await this.companyModel.findOne({
+            where: {
+                uuid: providedUUID,
+            },
+            attributes: ["uuid", "name", "official_email"],
+        });
+
+        if (!foundCompany) {
+            throw new ProcessingError("ce02");
+        }
+
+        const { name, official_email: email } = foundCompany;
+
+        return { name, email };
+    }
+
+    editCompanyName = async ({ companyUUID: providedUUID, name: providedName }) => {
+        const foundCompany = await this.companyModel.findOne({
+            where: {
+                uuid: providedUUID,
+            },
+            attributes: ["uuid", "name"],
+        });
+
+        if (!foundCompany) {
+            throw new ProcessingError("ce02");
+        }
+        if (providedName === foundCompany.name) {
+            throw new ProcessingError("ci01");
+        }
+
+        foundCompany.name = providedName;
+        await foundCompany.save();
+
+        return foundCompany;
+    }
+
+    editCompanyEmail = async ({ companyUUID: providedUUID, email: providedEmail }) => {
+        const foundCompany = await this.companyModel.findOne({
+            where: {
+                uuid: providedUUID,
+            },
+            attributes: ["uuid", "official_email"],
+        });
+
+        if (!foundCompany) {
+            throw new ProcessingError("ce02");
+        }
+        if (providedEmail === foundCompany.official_email) {
+            throw new ProcessingError("ci02");
+        }
+
+        foundCompany.official_email = providedEmail;
+        await foundCompany.save();
+
+        return foundCompany;
+    }
 }
-
-export default CompanyService;
