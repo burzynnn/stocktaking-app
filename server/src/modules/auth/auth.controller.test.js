@@ -1,575 +1,424 @@
-import argon2 from "argon2";
 import faker from "faker";
 
 import AuthController from "./auth.controller";
-import * as hashGenerator from "../../utils/generateHash";
-import * as expirationDateGenerator from "../../utils/generateExpirationDate";
+import ActionMessages from "../../config/actionMessages.config";
 
 import expressMock from "../../../tests/utils/mock";
 
 export default () => {
-    describe("getLogin", () => {
-        it("should execute with correct attributes", () => {
-            const authController = new AuthController();
+    const csrfToken = faker.random.hexaDecimal(128);
 
-            const token = "CIwNZNlR4XbisJF39I8yWnWX9wX4WFoz";
-            const errors = ["first error", "second error"];
-            const inputs = { email: faker.internet.email(), password: faker.internet.password() };
+    describe("getLogIn", () => {
+        it("should render", () => {
+            const authController = new AuthController({});
 
             const req = expressMock.mockRequest();
-            req.csrfToken = () => token;
-            req.flash = (type) => (type === "errors" ? errors : [inputs]);
+            req.csrfToken = () => csrfToken;
+            req.flash = (type) => (type === "messages" ? [] : [[]]);
             const res = expressMock.mockResponse();
 
-            authController.getLogin(req, res);
+            authController.getLogIn(req, res);
 
             expect(res.render).toHaveBeenCalledTimes(1);
-            expect(res.render).toHaveBeenCalledWith("modules/auth/login", {
-                title: "Log in!", csrf: token, errors, inputs,
+            expect(res.render).toHaveBeenCalledWith("auth/login", {
+                title: "Log in!",
+                csrf: csrfToken,
+                errors: [],
+                inputs: [],
+                messages: [],
             });
         });
     });
 
-    describe("postLogin", () => {
-        let req;
-        let values;
-        let res;
-        beforeEach(() => {
-            req = expressMock.mockRequest();
-            values = {
+    describe("postLogIn", () => {
+        it("should fetch data, then redirect", async () => {
+            const userData = {
                 email: faker.internet.email(),
-                password: "secondPassword",
+                password: faker.internet.password(),
             };
-            req.body = values;
+            const authData = {
+                loggedIn: true,
+                userUUID: faker.random.uuid(),
+                userName: faker.name.firstName(),
+                userCompanyUUID: faker.random.uuid(),
+                userType: "owner",
+            };
+
+            const authController = new AuthController({
+                authService: {
+                    logIn: jest.fn().mockReturnValue(authData),
+                },
+            });
+
+            const req = expressMock.mockRequest();
+            req.body = userData;
             req.session = {};
-            req.session.loggedIn = false;
-            res = expressMock.mockResponse();
-        });
+            const res = expressMock.mockResponse();
 
-        it("should check if session is logged in", async () => {
-            const authController = new AuthController();
+            await authController.postLogIn(req, res);
 
-            req.session.loggedIn = true;
-
-            await authController.postLogin(req, res, expressMock.mockNext);
-
+            expect(authController.authService.logIn).toHaveBeenCalledTimes(1);
+            expect(authController.authService.logIn).toHaveBeenCalledWith({
+                email: userData.email,
+                password: userData.password,
+            });
+            expect(req.session).toMatchObject(authData);
             expect(res.redirect).toHaveBeenCalledTimes(1);
-            expect(res.redirect).toHaveBeenCalledWith("/");
-        });
-
-        it("should check if provided user exists", async () => {
-            const authController = new AuthController({}, {
-                findOneByEmail: jest.fn().mockReturnValue(undefined),
-            });
-
-            await authController.postLogin(req, res, expressMock.mockNext);
-
-            expect(authController.userService.findOneByEmail).toHaveBeenCalledTimes(1);
-            expect(authController.userService.findOneByEmail).toHaveBeenCalledWith(values.email);
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>No user found with provided email.</h1>");
-        });
-
-        it("should check if user account is activated", async () => {
-            const authController = new AuthController({}, {
-                findOneByEmail: jest.fn().mockReturnValue({ active: false }),
-            });
-
-            await authController.postLogin(req, res, expressMock.mockNext);
-
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>You didn't activate your account.</h1>");
-        });
-
-        it("should check is user provided correct password", async () => {
-            const hash = await argon2.hash("firstPassword");
-            const authController = new AuthController({}, {
-                findOneByEmail: jest.fn().mockReturnValue({ active: true, password: hash }),
-            });
-
-            await authController.postLogin(req, res, expressMock.mockNext);
-
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>Wrong password.</h1>");
-        });
-
-        it("should log user in and update fill session info", async () => {
-            const password = "samePassword";
-            const hash = await argon2.hash(password);
-            const findOneByEmailMock = {
-                active: true,
-                password: hash,
-                uuid: faker.random.uuid(),
-                user_type_uuid: faker.random.uuid(),
-            };
-            const authController = new AuthController({}, {
-                findOneByEmail: jest.fn().mockReturnValue(findOneByEmailMock),
-            });
-
-            req.body.password = password;
-
-            await authController.postLogin(req, res, expressMock.mockNext);
-
-            expect(req.session.loggedIn).toBeTruthy();
-            expect(req.session.uuid).toEqual(findOneByEmailMock.uuid);
-            expect(req.session.user_type_uuid).toEqual(findOneByEmailMock.user_type_uuid);
-            expect(res.redirect).toHaveBeenCalledTimes(1);
-            expect(res.redirect).toHaveBeenCalledWith("/");
+            expect(res.redirect).toHaveBeenCalledWith("/dashboard");
         });
     });
 
     describe("getRegister", () => {
-        it("should execute with correct attributes", () => {
-            const authController = new AuthController();
-
-            const token = "CIwNZNlR4XbisJF39I8yWnWX9wX4WFoz";
+        it("should render", () => {
+            const authController = new AuthController({});
 
             const req = expressMock.mockRequest();
-            req.csrfToken = () => token;
+            req.csrfToken = () => csrfToken;
+            req.flash = (type) => (type === "messages" ? [] : [[]]);
             const res = expressMock.mockResponse();
 
             authController.getRegister(req, res);
 
             expect(res.render).toHaveBeenCalledTimes(1);
-            expect(res.render).toHaveBeenCalledWith("modules/auth/register", { title: "Register", csrf: token });
+            expect(res.render).toHaveBeenCalledWith("auth/register", {
+                title: "Register",
+                csrf: csrfToken,
+                errors: [],
+                inputs: [],
+                messages: [],
+            });
         });
     });
 
     describe("postRegister", () => {
-        const hash = "somehash";
-        let hashSpy;
-        const date = new Date();
-        let dateSpy;
-
-        beforeAll(() => {
-            hashSpy = jest.spyOn(hashGenerator, "default").mockReturnValue(hash);
-            dateSpy = jest.spyOn(expirationDateGenerator, "default").mockReturnValue(date);
-        });
-
-        afterEach(() => {
-            hashSpy.mockClear();
-            dateSpy.mockClear();
-        });
-
-        let req;
-        let values;
-        let res;
-        beforeEach(() => {
-            req = expressMock.mockRequest();
-            values = {
-                companyName: faker.company.companyName(),
-                companyEmail: faker.internet.email(),
-                userName: faker.internet.userName(),
-                userEmail: faker.internet.email(),
-                userPassword: faker.internet.password(),
+        it("should register user and company, then redirect", async () => {
+            const userData = {
+                uuid: faker.random.uuid(),
+                name: faker.name.firstName(),
+                email: faker.internet.email(),
+                password: faker.internet.password(),
+                activationHash: faker.random.hexaDecimal(128),
             };
-            req.body = values;
-            res = expressMock.mockResponse();
-        });
+            const companyData = {
+                uuid: faker.random.uuid(),
+                name: faker.company.companyName(),
+                email: faker.internet.email(),
+                activationHash: faker.random.hexaDecimal(128),
+            };
 
-        it("should check if company already exists", async () => {
             const authController = new AuthController({
-                findOneByEmail: jest.fn().mockReturnValue({ email: values.companyEmail }),
+                companyService: {
+                    create: jest.fn().mockImplementation(({ name, email }) => ({
+                        uuid: companyData.uuid,
+                        name,
+                        official_email: email,
+                        activation_hash: companyData.activationHash,
+                    })),
+                },
+                userService: {
+                    create: jest.fn().mockImplementation(({
+                        name,
+                        email,
+                        password,
+                        companyUUID,
+                        userTypeUUID,
+                    }) => ({
+                        uuid: userData.uuid,
+                        name,
+                        email,
+                        password: `argon2-${password}`,
+                        company_uuid: companyUUID,
+                        user_type_uuid: userTypeUUID,
+                        activation_hash: userData.activationHash,
+                    })),
+                },
+                mailService: {
+                    companyRegister: jest.fn(),
+                    userRegister: jest.fn(),
+                },
+                actionMessages: new ActionMessages(),
             });
 
-            await authController.postRegister(req, res, expressMock.mockNext);
+            const req = expressMock.mockRequest();
+            req.body = {
+                companyName: companyData.name,
+                companyEmail: companyData.email,
+                userName: userData.name,
+                userEmail: userData.email,
+                userPassword: userData.password,
+            };
+            req.flash = jest.fn();
+            const res = expressMock.mockResponse();
 
-            expect(authController.companyService.findOneByEmail).toHaveBeenCalledTimes(1);
-            expect(authController.companyService.findOneByEmail)
-                .toHaveBeenCalledWith(values.companyEmail);
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>Company with this email has been already registered.");
-        });
+            await authController.postRegister(req, res);
 
-        it("should check if user already exists", async () => {
-            const authController = new AuthController({
-                findOneByEmail: jest.fn().mockReturnValue(undefined),
-                create: jest.fn().mockImplementation((company) => ({
-                    ...company,
-                    official_email: company.email,
-                })),
-            }, {
-                findOneByEmail: jest.fn().mockReturnValue({ email: values.userEmail }),
-            }, {
-                sendMail: jest.fn(),
-            });
-
-            await authController.postRegister(req, res, expressMock.mockNext);
-
-            expect(hashSpy).toHaveBeenCalledTimes(1);
-            expect(hashSpy).toHaveBeenCalledWith(128);
-            expect(dateSpy).toHaveBeenCalledTimes(1);
-            expect(dateSpy).toHaveBeenCalledWith(1);
             expect(authController.companyService.create).toHaveBeenCalledTimes(1);
             expect(authController.companyService.create).toHaveBeenCalledWith({
-                name: values.companyName,
-                email: values.companyEmail,
-                hash,
-                timestamp: date,
-            });
-            expect(authController.mailer.sendMail).toHaveBeenCalledTimes(1);
-            expect(authController.mailer.sendMail).toHaveBeenCalledWith({
-                to: values.companyEmail,
-                subject: "Confirm your company registration.",
-                text: `We are happy to see your company on stocktaking-app!
-                However, we have to be sure that your registration wasn't a mistake. Please go to the link you see below.
-                http://localhost:3000/auth/registration-verification?hash=${hash}&type=company`,
-                html: `<h1>We are happy to see your company on stocktaking-app!</h1>
-                <p>However, we have to be sure that your registration wasn't a mistake. Please click link below.<p>
-                <a href='http://localhost:3000/auth/registration-verification?hash=${hash}&type=company'>Confirm your registration!</a>`,
-            });
-            expect(authController.userService.findOneByEmail).toHaveBeenCalledTimes(1);
-            expect(authController.userService.findOneByEmail)
-                .toHaveBeenCalledWith(values.userEmail);
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>User with this email has been already registered</h1>");
-        });
-
-        it("should register company and user", async () => {
-            const argon2HashSpy = jest.spyOn(argon2, "hash").mockImplementation((password) => `argon2-${password}`);
-            const companyUUID = faker.random.uuid();
-            const authController = new AuthController({
-                findOneByEmail: jest.fn().mockReturnValue(undefined),
-                create: jest.fn().mockImplementation((company) => ({
-                    ...company,
-                    official_email: company.email,
-                    uuid: companyUUID,
-                })),
-            }, {
-                findOneByEmail: jest.fn().mockReturnValue(undefined),
-                create: jest.fn().mockImplementation((user) => user),
-            }, {
-                sendMail: jest.fn(),
-            });
-
-            await authController.postRegister(req, res, expressMock.mockNext);
-
-            expect(hashSpy).toHaveBeenCalledTimes(2);
-            expect(hashSpy).toHaveBeenCalledWith(128);
-            expect(dateSpy).toHaveBeenCalledTimes(2);
-            expect(dateSpy).toHaveBeenCalledWith(1);
-            expect(authController.companyService.create).toHaveBeenCalledTimes(1);
-            expect(authController.companyService.create).toHaveBeenCalledWith({
-                name: values.companyName,
-                email: values.companyEmail,
-                hash,
-                timestamp: date,
+                name: companyData.name,
+                email: companyData.email,
             });
             expect(authController.userService.create).toHaveBeenCalledTimes(1);
             expect(authController.userService.create).toHaveBeenCalledWith({
-                name: values.userName,
-                email: values.userEmail,
-                password: `argon2-${values.userPassword}`,
-                hash,
-                timestamp: date,
-                companyUUID,
+                name: userData.name,
+                email: userData.email,
+                password: userData.password,
+                companyUUID: companyData.uuid,
                 userTypeUUID: "b8c2301c-ac75-4aa5-86ba-0d70956a59ea",
             });
-            expect(authController.mailer.sendMail).toHaveBeenCalledTimes(2);
-            expect(authController.mailer.sendMail).toHaveBeenNthCalledWith(1, {
-                to: values.companyEmail,
-                subject: "Confirm your company registration.",
-                text: `We are happy to see your company on stocktaking-app!
-                However, we have to be sure that your registration wasn't a mistake. Please go to the link you see below.
-                http://localhost:3000/auth/registration-verification?hash=${hash}&type=company`,
-                html: `<h1>We are happy to see your company on stocktaking-app!</h1>
-                <p>However, we have to be sure that your registration wasn't a mistake. Please click link below.<p>
-                <a href='http://localhost:3000/auth/registration-verification?hash=${hash}&type=company'>Confirm your registration!</a>`,
+            expect(authController.mailService.companyRegister).toHaveBeenCalledTimes(1);
+            expect(authController.mailService.companyRegister).toHaveBeenCalledWith({
+                receiver: companyData.email,
+                activationHash: companyData.activationHash,
             });
-            expect(authController.mailer.sendMail).toHaveBeenNthCalledWith(2, {
-                to: values.userEmail,
-                subject: "Confirm your registration.",
-                text: `We are happy to see you on stocktaking-app!
-                However, we have to be sure that your registration wasn't a mistake. Please go to the link you see below.
-                http://localhost:3000/auth/registration-verification?hash=${hash}&type=user`,
-                html: `<h1>We are happy to see you on stocktaking-app!</h1>
-                <p>However, we have to be sure that your registration wasn't a mistake. Please click link below.<p>
-                <a href='http://localhost:3000/auth/registration-verification?hash=${hash}&type=user'>Confirm your registration!</a>`,
+            expect(authController.mailService.userRegister).toHaveBeenCalledTimes(1);
+            expect(authController.mailService.userRegister).toHaveBeenCalledWith({
+                receiver: userData.email,
+                activationHash: userData.activationHash,
             });
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>Your company has been registered and user created.</h1>");
-
-            argon2HashSpy.mockRestore();
+            expect(req.flash).toHaveBeenCalledTimes(1);
+            expect(req.flash).toHaveBeenCalledWith("messages", [{ type: "Success", text: "Account created." }, { type: "Information", text: "Head to both company and user email, verify your credentials and log in!" }]);
+            expect(res.redirect).toHaveBeenCalledTimes(1);
+            expect(res.redirect).toHaveBeenCalledWith("/auth/login");
         });
+    });
 
-        afterAll(() => {
-            hashSpy.mockRestore();
-            dateSpy.mockRestore();
+    describe("getLogOut", () => {
+        it("should logout, then redirect", () => {
+            const authController = new AuthController({
+                actionMessages: new ActionMessages(),
+            });
+
+            const req = expressMock.mockRequest();
+            req.session = {
+                destroy: jest.fn().mockImplementation((callback) => callback(null)),
+            };
+            req.flash = jest.fn();
+            const res = expressMock.mockResponse();
+            const redirectMock = jest.fn();
+            res.clearCookie = jest.fn().mockReturnValue({
+                redirect: redirectMock,
+            });
+
+            authController.getLogOut(req, res);
+
+            expect(req.session.destroy).toHaveBeenCalledTimes(1);
+            expect(req.flash).toHaveBeenCalledTimes(1);
+            expect(req.flash).toHaveBeenCalledWith("messages", [{ type: "Information", text: "Successfully logged out." }]);
+            expect(res.clearCookie).toHaveBeenCalledTimes(1);
+            expect(res.clearCookie).toHaveBeenCalledWith("stocktaking.sid");
+            expect(redirectMock).toHaveBeenCalledTimes(1);
+            expect(redirectMock).toHaveBeenCalledWith("/auth/login");
         });
     });
 
     describe("getRegistrationVerification", () => {
-        ["company", "user"].forEach((type) => {
-            let req;
-            let values;
-            let res;
-            beforeEach(() => {
-                req = expressMock.mockRequest();
-                values = {
-                    hash: faker.random.number().toString(),
-                    type,
-                };
-                req.query = values;
-                res = expressMock.mockResponse();
+        it("should verify company account, then redirect", async () => {
+            const companyData = {
+                activationHash: faker.random.hexaDecimal(128),
+            };
+
+            const authController = new AuthController({
+                authService: {
+                    companyVerifyRegistration: jest.fn(),
+                },
+                actionMessages: new ActionMessages(),
             });
 
-            it(`should check if ${type} exists`, async () => {
-                const authController = new AuthController({
-                    findOneByActivationHash: jest.fn().mockReturnValue(undefined),
-                }, {
-                    findOneByActivationHash: jest.fn().mockReturnValue(undefined),
-                });
+            const req = expressMock.mockRequest();
+            req.flash = jest.fn();
+            req.query = {
+                hash: companyData.activationHash,
+                type: "company",
+            };
+            const res = expressMock.mockResponse();
 
-                await authController.getRegistrationVerification(req, res, expressMock.mockNext);
+            await authController.getRegistrationVerification(req, res);
 
-                expect(authController[`${type}Service`].findOneByActivationHash).toHaveBeenCalledTimes(1);
-                expect(authController[`${type}Service`].findOneByActivationHash).toHaveBeenCalledWith(values.hash);
-                expect(res.send).toHaveBeenCalledTimes(1);
-                expect(res.send).toHaveBeenCalledWith(`<h1>${type} not found.</h1>`);
+            expect(authController.authService.companyVerifyRegistration).toHaveBeenCalledTimes(1);
+            expect(authController.authService.companyVerifyRegistration).toHaveBeenCalledWith({
+                activationHash: companyData.activationHash,
+            });
+            expect(req.flash).toHaveBeenCalledTimes(1);
+            expect(req.flash).toHaveBeenCalledWith("messages", [{ type: "Success", text: "Company account activated." }, { type: "Information", text: "If you have activated user account, then you can login using it's credentials." }]);
+            expect(res.redirect).toHaveBeenCalledTimes(1);
+            expect(res.redirect).toHaveBeenCalledWith("/auth/login");
+        });
+
+        it("should verify user account, then redirect", async () => {
+            const userData = {
+                activationHash: faker.random.hexaDecimal(128),
+            };
+
+            const authController = new AuthController({
+                authService: {
+                    userVerifyRegistration: jest.fn(),
+                },
+                actionMessages: new ActionMessages(),
             });
 
-            it(`should check if ${type} activation expiration date has passed`, async () => {
-                const authController = new AuthController({
-                    findOneByActivationHash: jest.fn().mockReturnValue({
-                        activation_expiration_date: new Date(0),
-                    }),
-                }, {
-                    findOneByActivationHash: jest.fn().mockReturnValue({
-                        activation_expiration_date: new Date(0),
-                    }),
-                });
+            const req = expressMock.mockRequest();
+            req.flash = jest.fn();
+            req.query = {
+                hash: userData.activationHash,
+                type: "user",
+            };
+            const res = expressMock.mockResponse();
 
-                await authController.getRegistrationVerification(req, res, expressMock.mockNext);
+            await authController.getRegistrationVerification(req, res);
 
-                expect(res.send).toHaveBeenCalledTimes(1);
-                expect(res.send).toHaveBeenCalledWith("<h1>Activation expired.</h1>");
+            expect(authController.authService.userVerifyRegistration).toHaveBeenCalledTimes(1);
+            expect(authController.authService.userVerifyRegistration).toHaveBeenCalledWith({
+                activationHash: userData.activationHash,
+            });
+            expect(req.flash).toHaveBeenCalledTimes(1);
+            expect(req.flash).toHaveBeenCalledWith("messages", [{ type: "Success", text: "User account activated." }, { type: "Information", text: "You can log in below." }]);
+            expect(res.redirect).toHaveBeenCalledTimes(1);
+            expect(res.redirect).toHaveBeenCalledWith("/auth/login");
+        });
+
+        it("should handle wrong type, then redirect", async () => {
+            const authController = new AuthController({
+                actionMessages: new ActionMessages(),
             });
 
-            it(`should activate ${type} account`, async () => {
-                const authController = new AuthController({
-                    findOneByActivationHash: jest.fn().mockReturnValue({
-                        activation_expiration_date: new Date(
-                            new Date().setHours(new Date().getHours + 1),
-                        ),
-                        save: jest.fn(),
-                    }),
-                }, {
-                    findOneByActivationHash: jest.fn().mockReturnValue({
-                        activation_expiration_date: new Date(
-                            new Date().setHours(new Date().getHours + 1),
-                        ),
-                        save: jest.fn(),
-                    }),
-                });
+            const req = expressMock.mockRequest();
+            req.flash = jest.fn();
+            req.query = {
+                type: "definitelyNotUser",
+            };
+            const res = expressMock.mockResponse();
 
-                await authController.getRegistrationVerification(req, res, expressMock.mockNext);
+            await authController.getRegistrationVerification(req, res);
 
-                const changes = authController[`${type}Service`].findOneByActivationHash.mock.results[0].value;
-
-                expect(changes.active).toBeTruthy();
-                expect(changes.activation_hash).toBeNull();
-                expect(changes.activation_expiration_date).toBeNull();
-                expect(changes.save).toHaveBeenCalledTimes(1);
-                expect(res.send).toHaveBeenCalledTimes(1);
-                expect(res.send).toHaveBeenCalledWith(`<h1>${type} has been activated.`);
-            });
+            expect(req.flash).toHaveBeenCalledTimes(1);
+            expect(req.flash).toHaveBeenCalledWith("messages", [{ type: "Error", text: "We can't verify account of this type." }]);
+            expect(res.redirect).toHaveBeenCalledTimes(1);
+            expect(res.redirect).toHaveBeenCalledWith("/auth/login");
         });
     });
 
     describe("getForgotPassword", () => {
-        it("should execute with correct attributes", () => {
-            const authController = new AuthController();
-
-            const token = "CIwNZNlR4XbisJF39I8yWnWX9wX4WFoz";
+        it("should render", () => {
+            const authController = new AuthController({});
 
             const req = expressMock.mockRequest();
-            req.csrfToken = () => token;
+            req.csrfToken = () => csrfToken;
+            req.flash = (type) => (type === "messages" ? [] : [[]]);
             const res = expressMock.mockResponse();
 
             authController.getForgotPassword(req, res);
 
             expect(res.render).toHaveBeenCalledTimes(1);
-            expect(res.render).toHaveBeenCalledWith("modules/auth/forgot-password", { title: "Forgot password", csrf: token });
+            expect(res.render).toHaveBeenCalledWith("auth/forgot-password", {
+                title: "Forgot password",
+                csrf: csrfToken,
+                errors: [],
+                inputs: [],
+                messages: [],
+            });
         });
     });
 
     describe("postForgotPassword", () => {
-        const hash = "somehash";
-        let hashSpy;
-        const date = new Date();
-        let dateSpy;
-        beforeAll(() => {
-            hashSpy = jest.spyOn(hashGenerator, "default").mockReturnValue(hash);
-            dateSpy = jest.spyOn(expirationDateGenerator, "default").mockReturnValue(date);
-        });
+        it("should initiate password reset procedure, then redirect", async () => {
+            const userData = {
+                email: faker.internet.email(),
+                passwordResetHash: faker.random.hexaDecimal(128),
+            };
 
-        afterEach(() => {
-            hashSpy.mockClear();
-            dateSpy.mockClear();
-        });
-
-        let req;
-        let values;
-        let res;
-        beforeEach(() => {
-            req = expressMock.mockRequest();
-            values = { email: faker.internet.email() };
-            req.body = values;
-            res = expressMock.mockResponse();
-        });
-
-        it("should check if user exists", async () => {
-            const authController = new AuthController({}, {
-                findOneByEmail: jest.fn().mockReturnValue(undefined),
-            }, {
-                sendMail: jest.fn(),
+            const authController = new AuthController({
+                authService: {
+                    userInitiatePasswordReset: jest.fn().mockReturnValue({
+                        email: userData.email,
+                        password_reset_hash: userData.passwordResetHash,
+                    }),
+                },
+                mailService: {
+                    passwordForgot: jest.fn(),
+                },
+                actionMessages: new ActionMessages(),
             });
 
-            await authController.postForgotPassword(req, res, expressMock.mockNext);
+            const req = expressMock.mockRequest();
+            req.flash = jest.fn();
+            req.body = {
+                email: userData.email,
+            };
+            const res = expressMock.mockResponse();
 
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>Head to your email account and check if message arrived.</h1>");
-            expect(authController.userService.findOneByEmail).toHaveBeenCalledTimes(1);
-            expect(authController.userService.findOneByEmail).toHaveBeenCalledWith(values.email);
-            expect(authController.mailer.sendMail).not.toHaveBeenCalled();
-        });
+            await authController.postForgotPassword(req, res);
 
-        it("should allow user to change password and send mail", async () => {
-            const authController = new AuthController({}, {
-                findOneByEmail: jest.fn().mockReturnValue({
-                    save: jest.fn().mockReturnThis(),
-                    email: values.email,
-                }),
-            }, {
-                sendMail: jest.fn(),
+            expect(authController.authService.userInitiatePasswordReset).toHaveBeenCalledTimes(1);
+            expect(authController.authService.userInitiatePasswordReset).toHaveBeenCalledWith({
+                email: userData.email,
             });
-
-            await authController.postForgotPassword(req, res, expressMock.mockNext);
-
-            const changes = authController.userService.findOneByEmail.mock.results[0].value;
-
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>Head to your email account and check if message arrived.</h1>");
-            expect(changes.password_reset_hash).toEqual(hash);
-            expect(changes.password_reset_expiration_date).toEqual(date);
-            expect(changes.save).toHaveBeenCalledTimes(1);
-            expect(authController.mailer.sendMail).toHaveBeenCalledTimes(1);
-            expect(authController.mailer.sendMail).toHaveBeenCalledWith({
-                to: values.email,
-                subject: "Reset password.",
-                text: `You have received this email because of your password reset request.
-                    If this was not done by you you can ignore this message.
-                    Otherwise click link below.
-                    http://localhost:3000/auth/reset-password?hash=${hash}`,
-                html: `<h1>You have received this email because of your password reset request.</h1>
-                    <p>If this was not done by you you can ignore this message.
-                    Otherwise click link below.<p>
-                    <a href='http://localhost:3000/auth/reset-password?hash=${hash}'>Reset my password!</a>`,
+            expect(authController.mailService.passwordForgot).toHaveBeenCalledTimes(1);
+            expect(authController.mailService.passwordForgot).toHaveBeenCalledWith({
+                receiver: userData.email,
+                passwordResetHash: userData.passwordResetHash,
             });
-        });
-
-        afterAll(() => {
-            hashSpy.mockRestore();
-            dateSpy.mockRestore();
+            expect(req.flash).toHaveBeenCalledTimes(1);
+            expect(req.flash).toHaveBeenCalledWith("messages", [{ type: "Warning", text: "Due to security reasons we can't confirm that provided email was correct." }, { type: "Information", text: "Head to your email account and check if reset password email arrived. If not you probably used wrong email address." }]);
+            expect(res.redirect).toHaveBeenCalledTimes(1);
+            expect(res.redirect).toHaveBeenCalledWith("/auth/forgot-password");
         });
     });
 
     describe("getResetPassword", () => {
-        it("should execute with correct attributes", () => {
-            const authController = new AuthController();
-
-            const token = "CIwNZNlR4XbisJF39I8yWnWX9wX4WFoz";
+        it("should render", () => {
+            const authController = new AuthController({});
 
             const req = expressMock.mockRequest();
-            req.csrfToken = () => token;
+            req.csrfToken = () => csrfToken;
+            req.flash = (type) => (type === "messages" ? [] : [[]]);
             const res = expressMock.mockResponse();
 
             authController.getResetPassword(req, res);
 
             expect(res.render).toHaveBeenCalledTimes(1);
-            expect(res.render).toHaveBeenCalledWith("modules/auth/reset-password", { title: "Reset password", csrf: token });
+            expect(res.render).toHaveBeenCalledWith("auth/reset-password", {
+                title: "Reset password",
+                csrf: csrfToken,
+                errors: [],
+                inputs: [],
+                messages: [],
+            });
         });
     });
 
     describe("postResetPassword", () => {
-        let req;
-        let values;
-        let res;
-        beforeEach(() => {
-            req = expressMock.mockRequest();
-            values = {
-                body: {
-                    newPassword: faker.internet.password(),
-                },
-                query: {
-                    hash: faker.random.number().toString(),
-                },
+        it("should set new password, then redirect", async () => {
+            const userData = {
+                hash: faker.random.hexaDecimal(128),
+                newPassword: faker.internet.password(),
             };
-            req.body = values.body;
-            req.query = values.query;
-            res = expressMock.mockResponse();
-        });
 
-        it("should check if user exists", async () => {
-            const authController = new AuthController({}, {
-                findOneByPasswordResetHash: jest.fn().mockReturnValue(undefined),
+            const authController = new AuthController({
+                authService: {
+                    userResetPassword: jest.fn(),
+                },
+                actionMessages: new ActionMessages(),
             });
 
-            await authController.postResetPassword(req, res, expressMock.mockNext);
+            const req = expressMock.mockRequest();
+            req.flash = jest.fn();
+            req.query = {
+                hash: userData.hash,
+            };
+            req.body = {
+                newPassword: userData.newPassword,
+            };
+            const res = expressMock.mockResponse();
 
-            expect(authController.userService.findOneByPasswordResetHash).toHaveBeenCalledTimes(1);
-            expect(authController.userService.findOneByPasswordResetHash)
-                .toHaveBeenCalledWith(values.query.hash);
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>No user found by provided hash.</h1>");
-        });
+            await authController.postResetPassword(req, res);
 
-        it("should check if password reset expiration date has passed", async () => {
-            const authController = new AuthController({}, {
-                findOneByPasswordResetHash: jest.fn().mockReturnValue({
-                    password_reset_expiration_date: new Date(0),
-                }),
+            expect(authController.authService.userResetPassword).toHaveBeenCalledTimes(1);
+            expect(authController.authService.userResetPassword).toHaveBeenCalledWith({
+                hash: userData.hash,
+                password: userData.newPassword,
             });
-
-            await authController.postResetPassword(req, res, expressMock.mockNext);
-
-            expect(authController.userService.findOneByPasswordResetHash).toHaveBeenCalledTimes(1);
-            expect(authController.userService.findOneByPasswordResetHash)
-                .toHaveBeenCalledWith(values.query.hash);
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>Activation expired.</h1>");
-        });
-
-        it("should successfully change user password", async () => {
-            const argon2HashSpy = jest.spyOn(argon2, "hash").mockImplementation((password) => `argon2-${password}`);
-
-            const authController = new AuthController({}, {
-                findOneByPasswordResetHash: jest.fn().mockReturnValue({
-                    password_reset_expiration_date: new Date(
-                        new Date().setHours(new Date().getHours + 1),
-                    ),
-                    save: jest.fn(),
-                }),
-            });
-
-            await authController.postResetPassword(req, res, expressMock.mockNext);
-
-            const changes = authController
-                .userService.findOneByPasswordResetHash.mock.results[0].value;
-
-            expect(authController.userService.findOneByPasswordResetHash).toHaveBeenCalledTimes(1);
-            expect(authController.userService.findOneByPasswordResetHash)
-                .toHaveBeenCalledWith(values.query.hash);
-            expect(argon2HashSpy).toHaveBeenCalledTimes(1);
-            expect(argon2HashSpy).toHaveBeenCalledWith(values.body.newPassword);
-            expect(changes.password).toEqual(`argon2-${values.body.newPassword}`);
-            expect(changes.password_reset_hash).toBeNull();
-            expect(changes.password_reset_date).toBeNull();
-            expect(changes.save).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledTimes(1);
-            expect(res.send).toHaveBeenCalledWith("<h1>Password changed successfully.</h1>");
-
-            argon2HashSpy.mockRestore();
+            expect(req.flash).toHaveBeenCalledTimes(1);
+            expect(req.flash).toHaveBeenCalledWith("messages", [{ type: "Success", text: "Password changed successfully." }, { type: "Information", text: "You can log in now using new password." }]);
         });
     });
 };
