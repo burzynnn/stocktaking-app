@@ -26,7 +26,6 @@ router.route("/edit-name")
         companyValidator.returnValidator("postEditCompanyName"),
         authMiddleware.authenticate,
         authMiddleware.isOwner,
-        authMiddleware.ensureCredibility,
         companyController.postEditCompanyName,
     );
 
