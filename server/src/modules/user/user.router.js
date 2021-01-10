@@ -3,7 +3,6 @@ import { Router } from "express";
 import UserController from "./user.controller";
 import UserService from "./user.service";
 import userModel from "./user.model";
-import userTypeModel from "../user_type/user_type.model";
 import companyModel from "../company/company.model";
 import UserValidator from "./user.validator";
 import AuthMiddleware from "../auth/auth.middleware";
@@ -13,7 +12,6 @@ const router = Router();
 const userController = new UserController({
     userService: new UserService({
         userModel,
-        userTypeModel,
         companyModel,
     }),
     actionMessages: new ActionMessages(),
