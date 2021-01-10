@@ -1,26 +1,27 @@
-import { Model, DataTypes } from "sequelize";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidV4 } from "uuid";
+import { DataTypes } from "sequelize";
 
-import dbConnection from "../../loaders/postgres.loader";
+export default (databaseConnection) => {
+    const Category = databaseConnection.define("category", {
+        uuid: {
+            primaryKey: true,
+            type: DataTypes.UUID,
+            defaultValue: () => uuidV4(),
+            allowNull: false,
+            unique: true,
+        },
+        name: {
+            type: DataTypes.STRING(35),
+            allowNull: false,
+        },
+    });
 
-class Category extends Model {}
+    Category.associate = (models) => {
+        Category.hasMany(models.item, { foreignKey: { allowNull: false } });
 
-Category.init({
-    uuid: {
-        primaryKey: true,
-        type: DataTypes.UUID,
-        defaultValue: () => uuidv4(),
-        allowNull: false,
-        unique: true,
-    },
-    name: {
-        type: DataTypes.STRING(35),
-        allowNull: false,
-    },
-}, {
-    sequelize: dbConnection,
-    modelName: "category",
-    timestamps: true,
-});
+        Category.belongsTo(models.company, { foreignKey: { allowNull: false } });
+        Category.belongsTo(models.user, { foreignKey: { name: "created_by", allowNull: false } });
+    };
 
-export default Category;
+    return Category;
+};

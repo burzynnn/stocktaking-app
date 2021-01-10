@@ -1,26 +1,32 @@
-import { Model, DataTypes } from "sequelize";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidV4 } from "uuid";
+import { DataTypes } from "sequelize";
 
-import dbConnection from "../../loaders/postgres.loader";
+export default (databaseConnection) => {
+    const Stocktake = databaseConnection.define("stocktake", {
+        uuid: {
+            primaryKey: true,
+            type: DataTypes.UUID,
+            defaultValue: () => uuidV4(),
+            allowNull: false,
+            unique: true,
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        finished: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
+    });
 
-class Stocktake extends Model {}
+    Stocktake.associate = (models) => {
+        Stocktake.hasMany(models.stocktakeItem, { foreignKey: { allowNull: false } });
 
-Stocktake.init({
-    uuid: {
-        primaryKey: true,
-        type: DataTypes.UUID,
-        defaultValue: () => uuidv4(),
-        allowNull: false,
-        unique: true,
-    },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-}, {
-    sequelize: dbConnection,
-    modelName: "stocktake",
-    timestamps: true,
-});
+        Stocktake.belongsTo(models.company, { foreignKey: { allowNull: false } });
+        Stocktake.belongsTo(models.user, { foreignKey: { name: "created_by", allowNull: false } });
+    };
 
-export default Stocktake;
+    return Stocktake;
+};
