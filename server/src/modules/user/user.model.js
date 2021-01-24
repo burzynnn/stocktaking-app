@@ -36,13 +36,13 @@ export default (databaseConnection) => {
     });
 
     User.associate = (models) => {
-        User.hasMany(models.category, { foreignKey: { name: "created_by", allowNull: false } });
-        User.hasMany(models.userVerification, { foreignKey: { allowNull: false } });
-        User.hasMany(models.stocktake, { foreignKey: { name: "created_by", allowNull: false } });
-        User.hasMany(models.stocktakeItem, { foreignKey: { name: "created_by", allowNull: false } });
-        User.hasMany(models.item, { foreignKey: { name: "created_by", allowNull: false } });
+        User.hasMany(models.category, { foreignKey: { allowNull: false, name: "created_by", type: DataTypes.UUID } });
+        User.hasMany(models.userVerification, { foreignKey: { allowNull: false, name: "user_uuid", type: DataTypes.UUID } });
+        User.hasMany(models.stocktake, { foreignKey: { allowNull: false, name: "created_by", type: DataTypes.UUID } });
+        User.hasMany(models.stocktakeItem, { foreignKey: { allowNull: false, name: "created_by", type: DataTypes.UUID } });
+        User.hasMany(models.item, { foreignKey: { allowNull: false, name: "created_by", type: DataTypes.UUID } });
 
-        User.belongsTo(models.company, { foreignKey: { allowNull: false } });
+        User.belongsTo(models.company, { foreignKey: { allowNull: false, name: "company_uuid", type: DataTypes.UUID } });
     };
 
     return User;

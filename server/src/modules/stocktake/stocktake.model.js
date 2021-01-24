@@ -22,10 +22,10 @@ export default (databaseConnection) => {
     });
 
     Stocktake.associate = (models) => {
-        Stocktake.hasMany(models.stocktakeItem, { foreignKey: { allowNull: false } });
+        Stocktake.hasMany(models.stocktakeItem, { foreignKey: { allowNull: false, name: "stocktake_uuid", type: DataTypes.UUID } });
 
-        Stocktake.belongsTo(models.company, { foreignKey: { allowNull: false } });
-        Stocktake.belongsTo(models.user, { foreignKey: { name: "created_by", allowNull: false } });
+        Stocktake.belongsTo(models.company, { foreignKey: { allowNull: false, name: "company_uuid", type: DataTypes.UUID } });
+        Stocktake.belongsTo(models.user, { foreignKey: { allowNull: false, name: "created_by", type: DataTypes.UUID } });
     };
 
     return Stocktake;

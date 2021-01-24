@@ -27,9 +27,9 @@ export default (databaseConnection) => {
     });
 
     StocktakeItem.associate = (models) => {
-        StocktakeItem.belongsTo(models.stocktake, { foreignKey: { allowNull: false } });
-        StocktakeItem.belongsTo(models.user, { foreignKey: { name: "created_by", allowNull: false } });
-        StocktakeItem.belongsTo(models.item, { foreignKey: { allowNull: false } });
+        StocktakeItem.belongsTo(models.stocktake, { foreignKey: { allowNull: false, name: "stocktake_uuid", type: DataTypes.UUID } });
+        StocktakeItem.belongsTo(models.user, { foreignKey: { allowNull: false, name: "created_by", type: DataTypes.UUID } });
+        StocktakeItem.belongsTo(models.item, { foreignKey: { allowNull: false, name: "item_uuid", type: DataTypes.UUID } });
     };
 
     return StocktakeItem;

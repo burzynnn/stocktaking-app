@@ -27,7 +27,7 @@ export default (databaseConnection) => {
     });
 
     UserVerification.associate = (models) => {
-        UserVerification.belongsTo(models.user, { foreignKey: { allowNull: false } });
+        UserVerification.belongsTo(models.user, { foreignKey: { allowNull: false, name: "user_uuid", type: DataTypes.UUID } });
     };
 
     return UserVerification;

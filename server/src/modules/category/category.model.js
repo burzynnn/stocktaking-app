@@ -17,10 +17,10 @@ export default (databaseConnection) => {
     });
 
     Category.associate = (models) => {
-        Category.hasMany(models.item, { foreignKey: { allowNull: false } });
+        Category.hasMany(models.item, { foreignKey: { allowNull: false, name: "category_uuid", type: DataTypes.UUID } });
 
-        Category.belongsTo(models.company, { foreignKey: { allowNull: false } });
-        Category.belongsTo(models.user, { foreignKey: { name: "created_by", allowNull: false } });
+        Category.belongsTo(models.company, { foreignKey: { allowNull: false, name: "company_uuid", type: DataTypes.UUID } });
+        Category.belongsTo(models.user, { foreignKey: { allowNull: false, name: "created_by", type: DataTypes.UUID } });
     };
 
     return Category;

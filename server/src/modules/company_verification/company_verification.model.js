@@ -27,7 +27,7 @@ export default (databaseConnection) => {
     });
 
     CompanyVerification.associate = (models) => {
-        CompanyVerification.belongsTo(models.company, { foreignKey: { allowNull: false } });
+        CompanyVerification.belongsTo(models.company, { foreignKey: { allowNull: false, name: "company_uuid", type: DataTypes.UUID } });
     };
 
     return CompanyVerification;

@@ -27,10 +27,10 @@ export default (databaseConnection) => {
     });
 
     Company.associate = (models) => {
-        Company.hasOne(models.companyVerification, { foreignKey: { allowNull: false } });
-        Company.hasMany(models.category, { foreignKey: { allowNull: false } });
-        Company.hasMany(models.user, { foreignKey: { allowNull: false } });
-        Company.hasMany(models.stocktake, { foreignKey: { allowNull: false } });
+        Company.hasOne(models.companyVerification, { foreignKey: { allowNull: false, name: "company_uuid", type: DataTypes.UUID } });
+        Company.hasMany(models.category, { foreignKey: { allowNull: false, name: "company_uuid", type: DataTypes.UUID } });
+        Company.hasMany(models.user, { foreignKey: { allowNull: false, name: "company_uuid", type: DataTypes.UUID } });
+        Company.hasMany(models.stocktake, { foreignKey: { allowNull: false, name: "company_uuid", type: DataTypes.UUID } });
     };
 
     return Company;
