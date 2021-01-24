@@ -35,15 +35,23 @@ const connection = new Sequelize(`postgres://stocktaking:${envConfig.postgres.pa
     },
 });
 
+// create models
 models.forEach((model) => {
     const createdModel = model(connection);
     database.models[createdModel.name] = createdModel;
 });
 
+// associate models
 Object.values(database.models).forEach((model) => {
     if (typeof model.associate === "function") {
         model.associate(database.models);
     }
+});
+
+// rename models
+Object.keys(database.models).forEach((key) => {
+    database.models[`${key}Model`] = database.models[key];
+    delete database.models[key];
 });
 
 const initiateDatabase = async ({ force }) => {
@@ -63,12 +71,12 @@ const initiateDatabase = async ({ force }) => {
 
 export default initiateDatabase;
 export const {
-    category,
-    company,
-    companyVerification,
-    item,
-    stocktake,
-    stocktakeItem,
-    user,
-    userVerification,
+    categoryModel,
+    companyModel,
+    companyVerificationModel,
+    itemModel,
+    stocktakeModel,
+    stocktakeItemModel,
+    userModel,
+    userVerificationModel,
 } = database.models;
