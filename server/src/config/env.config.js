@@ -3,6 +3,8 @@ const envConfig = {
         port: process.env.SRV_PORT,
         environment: process.env.NODE_ENV,
         session_secret: process.env.SRV_SESSION_SECRET,
+        domain: process.env.SRV_DOMAIN,
+        ssl: process.env.SRV_SSL,
     },
     postgres: {
         password: process.env.POSTGRES_CUSTOM_USER_PASSWORD,
@@ -12,7 +14,7 @@ const envConfig = {
     },
     sendgrid: {
         api_key: process.env.SENDGRID_API_KEY,
-        send_from: process.env.SENGRID_SEND_FROM,
+        sender_email: process.env.SENDGRID_SENDER_EMAIL,
     },
 };
 
@@ -23,5 +25,7 @@ Object.keys(envConfig).forEach((category) => {
         }
     });
 });
+
+envConfig.server.url = `http${envConfig.server.ssl === "true" ? "s" : ""}://${envConfig.server.domain}${envConfig.server.port === "80" ? "" : `:${envConfig.server.port}`}`;
 
 export default envConfig;
