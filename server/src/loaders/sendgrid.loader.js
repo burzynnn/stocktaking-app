@@ -13,4 +13,4 @@ class MailSender {
     sendMail = (opts) => this.sg.send({ from: this.from, ...opts });
 }
 
-export default new MailSender(sgMail, envConfig.sendgrid.send_from);
+export default new MailSender(sgMail, envConfig.sendgrid.sender_email);
