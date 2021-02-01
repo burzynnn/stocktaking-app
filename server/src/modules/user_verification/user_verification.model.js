@@ -11,7 +11,7 @@ export default (databaseConnection) => {
             unique: true,
         },
         type: {
-            type: DataTypes.ENUM("activation", "email_confirmation"),
+            type: DataTypes.ENUM("activation", "email_confirmation", "password_reset"),
             allowNull: false,
         },
         hash: {
