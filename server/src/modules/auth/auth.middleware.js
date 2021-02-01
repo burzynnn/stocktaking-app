@@ -7,9 +7,6 @@ export default {
             res.locals.userData = {
                 loggedIn, userUUID, userName, userCompanyUUID, userType,
             };
-            res.locals.pageData = {
-                path: req.baseUrl + req.path,
-            };
 
             return next();
         }

@@ -40,6 +40,12 @@ app.use(flash());
 app.use(express.static(join(__dirname, "public")));
 app.set("views", join(__dirname, "public", "views", "modules"));
 app.set("view engine", "pug");
+app.use((req, res, next) => {
+    res.locals.pageData = {
+        path: req.baseUrl + req.path,
+    };
+    next();
+});
 
 app.use("/", indexRouter);
 app.use("/auth", authRouter);
