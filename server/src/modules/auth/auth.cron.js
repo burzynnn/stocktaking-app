@@ -1,34 +1,54 @@
 import { CronJob } from "cron";
 
-import CompanyService from "../company/company.service";
-import companyModel from "../company/company.model";
 import UserService from "../user/user.service";
-import userModel from "../user/user.model";
+import CompanyVerificationService from "../company_verification/company_verification.service";
+import UserVerificationService from "../user_verification/user_verification.service";
+import { companyVerificationModel, userVerificationModel, userModel } from "../../loaders/postgres.loader";
 import logger from "../../utils/logger.util";
 
-const companyService = new CompanyService({ companyModel });
+const companyVerificationService = new CompanyVerificationService({ companyVerificationModel });
+const userVerificationService = new UserVerificationService({ userVerificationModel });
 const userService = new UserService({ userModel });
 
+/* eslint-disable no-await-in-loop */
 const removeNotActivatedAccounts = new CronJob("0 0 * * * *", async () => {
-    logger.info("Clearing not activated accounts.", { label: "auth-cron" });
+    logger.info("Deleting expired accounts.", { label: "auth-cron" });
 
-    // first find all expired companies and delete it and its owner
-    const allExpiredCompanies = await companyService.getAllWithExpiredActivation();
-    allExpiredCompanies.forEach(async (company) => {
-        const companyOwner = await userService.getOwnerByCompanyUUID({
-            companyUUID: company.uuid,
+    // firstly, find all companies with expired activations, delete them and their owners
+    const expiredCompaniesActivations = await companyVerificationService
+        .findAllExpiredActivations();
+    for (let i = 0; i < expiredCompaniesActivations.length; i += 1) {
+        const activation = expiredCompaniesActivations[i];
+        const notActivatedCompany = await activation.getCompany();
+        const companyOwner = await userService
+            .findOwnerOfCompany({ companyUUID: notActivatedCompany.uuid });
+        const ownerActivation = await userVerificationService.findActivationByUserUUID({
+            userUUID: companyOwner.uuid,
         });
-        await companyOwner.destroy();
-        await company.destroy();
-    });
 
-    // second find all expired owners and delete it and its company
-    const allExpiredOwners = await userService.getAllOwnersWithExpiredActivation();
-    allExpiredOwners.forEach(async (owner) => {
-        const companyOfExpiredOwner = await owner.getCompany();
-        await companyOfExpiredOwner.destroy();
-        await owner.destroy();
-    });
+        await activation.destroy();
+        await notActivatedCompany.destroy();
+        await companyOwner.destroy();
+        await ownerActivation.destroy();
+    }
+
+    // secondly, find all owners with expired activations and delete them and their companies
+    const expiredOwnersActivations = await userVerificationService
+        .findAllOwnersExpiredActivations();
+    for (let i = 0; i < expiredOwnersActivations.length; i += 1) {
+        const activation = expiredOwnersActivations[i];
+        const notActivatedOwner = activation.user;
+        const ownerCompany = await notActivatedOwner.getCompany();
+        const companyActivation = await companyVerificationService.findActivationByCompanyUUID({
+            companyUUID: ownerCompany.uuid,
+        });
+
+        await activation.destroy();
+        await notActivatedOwner.destroy();
+        await ownerCompany.destroy();
+        await companyActivation.destroy();
+    }
 }, null);
+/* eslint-enable no-await-in-loop */
 
 export default removeNotActivatedAccounts;
