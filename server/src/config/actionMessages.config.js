@@ -1,3 +1,4 @@
+/* eslint-disable quote-props */
 const DATA = {
     messages: {
         // user
@@ -7,16 +8,31 @@ const DATA = {
                 "02": "User email changed.",
                 "03": "User password changed.",
                 "04": "User account activated.",
+                "05": "Successfully deleted a user.",
+                "06": "User account deactivated.",
             },
             i: {
                 "01": "We accepted your request to change user name but it doesn't differ from actual one.",
                 "02": "We accepted your request to change user email but it doesn't differ from actual one.",
             },
-            w: {},
+            w: {
+                "01": "Owner can't perform this action on his own account.",
+            },
             e: {
                 "01": "No user found by provided UUID.",
                 "02": "User account has been already registered with provided email.",
                 "03": "No user found by provided email.",
+            },
+        },
+        // user verification
+        uv: {
+            s: {},
+            i: {},
+            w: {},
+            e: {
+                "01": "User activation process already started. Can't initiate another one.",
+                "02": "Can't find user verification by provided hash.",
+                "03": "User verification expired.",
             },
         },
         // auth
@@ -38,13 +54,15 @@ const DATA = {
             },
             e: {
                 "01": "Incorrect email or password.",
-                "02": "Account isn't active.",
+                "02": "User account isn't active.",
                 "03": "We couldn't find your account to verify by provided hash.",
                 "04": "Your registration verify hash expired. Both owner and company account will be deleted soon.",
                 "05": "Password reset hash expired.",
                 "06": "Passwords aren't the same.",
                 "07": "Account has been already registered with provided email.",
                 "08": "We can't verify account of this type.",
+                "09": "You need to activate company account first.",
+                "10": "You aren't allowed to see this page.",
             },
         },
         // company
@@ -64,6 +82,17 @@ const DATA = {
                 "02": "No company found by provided UUID.",
             },
         },
+        // company verification
+        cv: {
+            s: {},
+            i: {},
+            w: {},
+            e: {
+                "01": "Company activation process already started. Can't initiate another one.",
+                "02": "Can't find company verification by provided hash.",
+                "03": "Company verification expired.",
+            },
+        },
     },
     mapOfResults: {
         s: "Success",
@@ -72,6 +101,7 @@ const DATA = {
         e: "Error",
     },
 };
+/* eslint-enable quote-props */
 
 export default class ActionMessages {
     constructor() {
