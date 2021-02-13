@@ -1,19 +1,17 @@
-import { Joi } from "celebrate";
+import Validator from "../../utils/validator.util";
 
-import Validator from "../validator";
+const companyValidator = new Validator({
+    postChangeName: {
+        body: {
+            name: Validator.commonFields.companyName,
+        },
+    },
 
-export default class CompanyValidator extends Validator {
-    postEditCompanyEmail = {
-        body: Joi.object().options({ abortEarly: false }).keys({
-            _csrf: this.getField("_csrf"),
-            email: this.getField("email"),
-        }),
-    };
+    postChangeEmail: {
+        body: {
+            email: Validator.commonFields.email,
+        },
+    },
+});
 
-    postEditCompanyName = {
-        body: Joi.object().options({ abortEarly: false }).keys({
-            _csrf: this.getField("_csrf"),
-            name: Joi.string().trim().required(),
-        }),
-    };
-}
+export default companyValidator.proxy;

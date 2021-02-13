@@ -1,29 +1,41 @@
 import { Joi } from "celebrate";
 
-import Validator from "../validator";
+import Validator from "../../utils/validator.util";
 
-export default class UserValidator extends Validator {
-    postEditUserName = {
-        body: Joi.object().options({ abortEarly: false }).keys({
-            _csrf: this.getField("_csrf"),
-            name: Joi.string().trim().required(),
-        }),
-    }
+const userValidator = new Validator({
+    userUUID: {
+        params: {
+            userUUID: Validator.commonFields.uuid,
+        },
+    },
 
-    postEditUserEmail = {
-        body: Joi.object().options({ abortEarly: false }).keys({
-            _csrf: this.getField("_csrf"),
-            email: this.getField("email"),
-        }),
-    }
+    postEditName: {
+        body: {
+            name: Validator.commonFields.userName,
+        },
+    },
 
-    postEditUserPassword = {
-        body: Joi.object().options({ abortEarly: false }).keys({
-            _csrf: this.getField("_csrf"),
-            password: Joi.string().min(8).trim().allow(""),
+    postEditEmail: {
+        body: {
+            email: Validator.commonFields.email,
+        },
+    },
+
+    postEditPassword: {
+        body: {
+            password: Validator.commonFields.password,
             repeatPassword: Joi.any().valid(Joi.ref("password")).required().messages({
                 "any.only": "\"repeatPassword\" needs to match new password field value.",
             }),
-        }),
-    }
-}
+        },
+    },
+
+    postCreate: {
+        body: {
+            name: Validator.commonFields.userName,
+            email: Validator.commonFields.email,
+        },
+    },
+});
+
+export default userValidator.proxy;
