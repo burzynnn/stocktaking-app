@@ -18,6 +18,12 @@ export default class ErrorMiddleware {
 
             /* eslint-disable-next-line no-underscore-dangle */
             delete req.body._csrf;
+            delete req.body.password;
+            delete req.body.newPassword;
+            delete req.body.userPassword;
+            delete req.body.repeatPassword;
+            delete req.body.repeatNewPassword;
+            delete req.body.repeatUserPassword;
             req.flash("inputs", req.body);
             req.flash("errors", errors);
 
