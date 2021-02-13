@@ -1,0 +1,43 @@
+include ../../mixins/input.pug
+include ../../mixins/oneline-input.pug
+include ../../partials/head.pug
+body
+    include ../../partials/logged-header.pug
+    main
+        include ../../partials/messages-section.pug
+        h1 Edit #{inputs.name} account
+        p #[strong #{inputs.name}] is #[strong #{inputs.type}] of #[strong #{inputs.companyName}] company.
+        p Active: #{(inputs.active === true ? "yes" : "no")}
+
+        form(method="POST", action=`/dashboard/users/${inputs.uuid}/edit-name`)
+            input(type="hidden", name="_csrf", value=csrf)
+
+            +oneline-input("Name", "Update name", {placeholder: "Name", name: "name"})
+
+        form(method="POST", action=`/dashboard/users/${inputs.uuid}/edit-email`)
+            input(type="hidden", name="_csrf", value=csrf)
+
+            +oneline-input("Email", "Update email", {placeholder: "Email", name: "email"})
+
+        form(method="POST", action=`/dashboard/users/${inputs.uuid}/edit-password`)
+            input(type="hidden", name="_csrf", value=csrf)
+
+            +input("New password", {type: "password", placeholder: "********", name: "password"})
+            br
+            +input("Repeat new password", {type: "password", placeholder: "********", name: "repeatPassword"})
+            br
+            button(type="submit") Update password
+        br
+        if inputs.active === true
+            form(method="POST", action=`/dashboard/users/${inputs.uuid}/deactivate`)
+                input(type="hidden", name="_csrf", value=csrf)
+
+                button(type="submit") Deactivate
+        else if inputs.active === false
+            form(method="POST", action=`/dashboard/users/${inputs.uuid}/activate`)
+                input(type="hidden", name="_csrf", value=csrf)
+
+                button(type="submit") Activate
+
+        p Account have been created at #[strong #{inputs.accountCreationDate}].
+        p Last update of account information took place at #[strong #{inputs.accountLastUpdateDate}].

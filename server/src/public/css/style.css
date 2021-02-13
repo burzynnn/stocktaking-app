@@ -1,0 +1,26 @@
+.currentLink {
+    font-weight: 900;
+}
+
+.user-info {
+    list-style: none;
+    margin-bottom: 15px;
+}
+
+.user-info li {
+    font-weight: 700;
+}
+
+.user, .user-info {
+    background-color: rgba(236, 240, 241,1.0);
+    display: grid;
+    grid-template-columns: repeat(2, 2fr) repeat(4, 1fr);
+    grid-template-rows: 1fr;
+    justify-items: center;
+    align-items: center;
+    padding: 0;
+}
+
+.user {
+    margin-bottom: 5px;
+}

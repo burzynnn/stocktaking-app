@@ -1,0 +1,30 @@
+include ../../partials/head.pug
+body
+    include ../../partials/logged-header.pug
+    main
+        include ../../partials/messages-section.pug
+        section
+            ul.user-info
+                li Name
+                li Email
+                li Active
+                li Type
+                li Created at
+                li Action
+        if inputs
+            section
+                each input in inputs
+                    article.user
+                        h3
+                            a(href=`/dashboard/users/${input.uuid}`) #{input.name}
+                        p #{input.email}
+                        p #{input.active}
+                        p #{input.type}
+                        p #{input.createdAt}
+                        if userData.userUUID != input.uuid
+                            form(action=`/dashboard/users/${input.uuid}/delete`, method="POST")
+                                input(type="hidden", name="_csrf", value=csrf)
+
+                                button(type="submit") Delete
+
+        a(href="/dashboard/users/create") Create new user

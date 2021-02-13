@@ -1,0 +1,20 @@
+include ../../mixins/input.pug
+include ../../partials/head.pug
+body
+    include ../../partials/index-header.pug
+    main
+        include ../../partials/messages-section.pug
+        h2 Log in
+        section
+        form(method="POST", action="/auth/login")
+            input(type="hidden", name="_csrf", value=csrf)
+
+            +input("Email", {placeholder: "Email", name: "email"})
+            br
+            +input("Password", {type: "password", placeholder: "Password", name: "password"})
+            br
+            button(type="submit") Login 
+        p Forgot password? 
+            a(href="/auth/forgot-password") Change it!
+        p Want to join us? 
+            a(href="/auth/register") Register

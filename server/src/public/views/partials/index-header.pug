@@ -1,0 +1,13 @@
+include ../mixins/link.pug
+header
+        h1 Stocktaking app
+        nav
+            ul
+                li
+                    +link({href: "/", text: "Main page"})
+                li
+                    +link({href: "/contact", text: "Contact"})
+                li
+                    +link({href: "/auth/login", text: "Login"})
+                li
+                    +link({href: "/auth/register", text: "Register"})

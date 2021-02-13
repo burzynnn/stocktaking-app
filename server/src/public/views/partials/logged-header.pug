@@ -1,0 +1,16 @@
+include ../mixins/link.pug
+header
+        h1 Stocktaking app
+        nav
+            ul
+                li
+                    +link({href: "/dashboard", text: "Dashboard"})
+                if userData.userType === "owner"
+                    li
+                        +link({href: "/dashboard/company/edit", text: "Manage company"})
+                    li
+                        +link({href: "/dashboard/users", text: "Manage users"})
+                li
+                    +link({href: '/dashboard/users/me', alternativeHref: `/dashboard/users/${userData.userUUID}`, text: userData.userName})
+                li
+                    a(href="/auth/logout") Logout

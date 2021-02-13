@@ -1,0 +1,17 @@
+include ../../mixins/input.pug
+include ../../mixins/oneline-input.pug
+include ../../partials/head.pug
+body
+    include ../../partials/logged-header.pug
+    main
+        include ../../partials/messages-section.pug
+        h1 Create new user
+
+        form(method="POST", action="/dashboard/users/create")
+            input(type="hidden", name="_csrf", value=csrf)
+
+            +input("User name", {placeholder: "User name", name: "name"})
+            br
+            +input("Email", {placeholder: "user@email.com", name: "email"})
+            br
+            button(type="submit") Create

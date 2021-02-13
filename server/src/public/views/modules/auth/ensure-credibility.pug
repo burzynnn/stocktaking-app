@@ -1,0 +1,13 @@
+include ../../mixins/oneline-input.pug
+include ../../partials/head.pug
+body
+    include ../../partials/logged-header.pug
+    main
+        include ../../partials/messages-section.pug
+        h2 Ensure your credibility
+        p Action you are trying to complete, requires stronger authentication. Please provide your password so we can trust you.
+        section
+        form(method="POST", action="/auth/ensure-credibility")
+            input(type="hidden", name="_csrf", value=csrf)
+            
+            +oneline-input("Password", "Check my password", {placeholder: "Password", name: "password", type: "password"})

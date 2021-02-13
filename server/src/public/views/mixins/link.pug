@@ -1,2 +1,2 @@
 mixin link(options)
-    a(href=options.href, class=`${pageData.path === options.href ? "currentLink" : ""}`) #{options.text}
+    a(href=options.href, class=`${(pageData.path === options.href || pageData.path === options.alternativeHref) ? "currentLink" : ""}`) #{options.text}
