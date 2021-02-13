@@ -6,6 +6,9 @@ const router = Router();
 
 router.get("/", (req, res) => res.render("index/home", { title: "Stocktaking app" }));
 
-router.get("/dashboard", AuthMiddleware.authenticate, (req, res) => res.render("index/dashboard", { title: "Dashboard" }));
+router.get("/dashboard", AuthMiddleware.authenticate, (req, res) => res.render("index/dashboard", {
+    title: "Dashboard",
+    messages: req.flash("messages"),
+}));
 
 export default router;
